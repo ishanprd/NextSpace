@@ -8,149 +8,190 @@ class SignupPageForCoworker extends StatefulWidget {
 }
 
 class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
+  final _formKey = GlobalKey<FormState>();
+
+  // Example controllers for capturing user input
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _countryCodeController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is removed
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _dobController.dispose();
+    _countryCodeController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Use MediaQuery for responsiveness
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/signup_page_3.png', // Add the path to your image asset
-              fit: BoxFit.cover,
+      backgroundColor: const Color(0xFF0D47A1), // Blue background
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.05,
+              vertical: screenHeight * 0.03,
             ),
-          ),
-          // Overlay card with form
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.lightBlueAccent.shade100,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: screenHeight * 0.05),
+                const Text(
+                  "Sign Up",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'SpacenetWork',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    // Handle login link tap
+                  },
+                  child: const Text(
+                    "Already have an account? Log in",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
-                  const Text(
-                    'A Hive to Strive',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                    ),
+                ),
+                SizedBox(height: screenHeight * 0.05),
+                Container(
+                  padding: EdgeInsets.all(screenWidth * 0.05),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(height: 20),
-                  // Username field
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Username',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Password field
-                  TextField(
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _firstNameController,
+                                decoration: const InputDecoration(
+                                  labelText: "First Name",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _lastNameController,
+                                decoration: const InputDecoration(
+                                  labelText: "Last Name",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Confirm Password field
-                  TextField(
-                    obscureText: _obscureConfirmPassword,
-                    decoration: InputDecoration(
-                      hintText: 'Confirm password',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                        SizedBox(height: screenHeight * 0.02),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: "Email",
+                            border: OutlineInputBorder(),
+                          ),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
+                        SizedBox(height: screenHeight * 0.02),
+                        TextFormField(
+                          controller: _dobController,
+                          decoration: const InputDecoration(
+                            labelText: "Date of Birth",
+                            border: OutlineInputBorder(),
+                            suffixIcon: Icon(Icons.calendar_today),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: screenWidth * 0.25,
+                              child: TextFormField(
+                                controller: _countryCodeController,
+                                decoration: const InputDecoration(
+                                  labelText: "Country Code",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _phoneController,
+                                decoration: const InputDecoration(
+                                  labelText: "Phone Number",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: "Password",
+                            border: OutlineInputBorder(),
+                            suffixIcon: Icon(Icons.visibility_off),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.04),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              // Handle form submission
+                              print("Form Submitted");
+                            }
+                          },
+                          child: const Text("Log In"),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize:
+                                Size(double.infinity, screenHeight * 0.06),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+                        const Text("Or"),
+                        SizedBox(height: screenHeight * 0.02),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            // Handle Google Sign Up
+                            print("Google Sign Up");
+                          },
+                          icon: const Icon(Icons.g_mobiledata),
+                          label: const Text("Sign up with Google"),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize:
+                                Size(double.infinity, screenHeight * 0.06),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Sign in button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle sign in
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.teal,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 32),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text('Sign in'),
-                  ),
-                  const SizedBox(height: 10),
-                  // Log in link
-                  TextButton(
-                    onPressed: () {
-                      // Handle log in navigation
-                    },
-                    child: const Text(
-                      'Already have an account? Log in',
-                      style: TextStyle(color: Colors.teal),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -28,38 +28,37 @@ class _StartPageState extends State<StartPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon, Title, and Subtitle
                 const Column(
                   children: [
                     Icon(
                       Icons.location_on,
-                      color: Colors.white,
+                      color: Colors.red,
                       size: 40,
                     ),
                     Text(
-                      'SpacenetWork',
+                      'Next Space',
                       style: TextStyle(
-                        fontSize: 32,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          fontSize: 32,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Inter'),
                     ),
                     SizedBox(height: 8),
                     Text(
                       'A Hive to Strive',
                       style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white70,
-                      ),
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Inter'),
                     ),
                   ],
                 ),
                 const SizedBox(height: 30),
-                // Get Started Button
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Colors.blueAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -71,9 +70,7 @@ class _StartPageState extends State<StartPage> {
                   child: const Text(
                     'Get Started',
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
+                        fontSize: 18, color: Colors.white, fontFamily: 'Inter'),
                   ),
                 ),
               ],

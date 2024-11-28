@@ -8,170 +8,165 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool _obscurePassword = true;
+  bool _rememberMe = false;
 
   @override
   Widget build(BuildContext context) {
+    // Screen dimensions
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                    'assets/background.jpg'), // Replace with your image path
-                fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Top Spacer
+              SizedBox(
+                  height: screenHeight * 0.1), // Adjust based on screen height
+              // Logo
+              Icon(
+                Icons.shield,
+                size: screenWidth * 0.15, // Responsive size for the icon
+                color: Colors.blue,
               ),
-            ),
-          ),
-          // Blue Overlay for Form
-          Container(
-            color: Colors.lightBlue.withOpacity(0.85),
-          ),
-          // Login Form Content
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              SizedBox(height: screenHeight * 0.02),
+              // Title
+              Text(
+                "Sign in to your Account",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.06, // Responsive font size
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              // Subtitle
+              Text(
+                "Enter your email and password to log in",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.04, // Responsive font size
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.05),
+              // Google Sign-In Button
+              ElevatedButton.icon(
+                onPressed: () {
+                  // Add Google Sign-In Logic
+                },
+                icon: Icon(Icons.account_circle, size: screenWidth * 0.06),
+                label: Text(
+                  "Continue with Google",
+                  style: TextStyle(fontSize: screenWidth * 0.04),
+                ),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, screenHeight * 0.07),
+                  side: BorderSide(color: Colors.grey[300]!),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.03),
+              const Text("Or login with"),
+              SizedBox(height: screenHeight * 0.03),
+              // Email TextField
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  prefixIcon: const Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              // Password TextField
+              TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              // Remember Me and Forgot Password
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Logo/Icon and Title
-                  const Column(
+                  Row(
                     children: [
-                      Icon(
-                        Icons.location_on,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'SpacenetWork',
-                        style: TextStyle(
-                          fontSize: 30,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'A Hive to Strive',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  // Username TextField
-                  TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: 'Username',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 15,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Password TextField
-                  TextField(
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: 'Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 15,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: (value) {
                           setState(() {
-                            _obscurePassword = !_obscurePassword;
+                            _rememberMe = value!;
                           });
                         },
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Forgot Password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Add "Forgot Password" functionality
-                      },
-                      child: const Text(
-                        'Forgot password?',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Login Button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add Login functionality
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 80,
-                        vertical: 15,
-                      ),
-                    ),
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Sign-Up Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Don’t have an account?",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to Sign-Up Page
-                        },
-                        child: const Text(
-                          'Sign in',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                      Text("Remember me"),
                     ],
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to Forgot Password Screen
+                    },
+                    child: Text(
+                      "Forgot Password?",
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
+              SizedBox(height: screenHeight * 0.03),
+              // Log In Button
+              ElevatedButton(
+                onPressed: () {
+                  // Add Log-In Logic
+                },
+                child: Text(
+                  "Log In",
+                  style: TextStyle(fontSize: screenWidth * 0.045),
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, screenHeight * 0.07),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.03),
+              // Sign-Up Option
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Don't have an account?"),
+                  SizedBox(width: screenWidth * 0.01),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to Sign-Up Screen
+                    },
+                    child: Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

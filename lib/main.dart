@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:nextspace/pages/authentication/reset/confirm_email.dart';
+import 'package:nextspace/pages/authentication/reset/new_password.dart';
+import 'package:nextspace/pages/authentication/reset/reset_password.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/email_page_for_coworker.dart';
 import 'package:nextspace/pages/authentication/login_page.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/email_verification_for_coworker.dart';
@@ -42,6 +45,9 @@ class NextSpace extends StatelessWidget {
             const EmailVerificationForCoworker(),
         '/emailverification/spaceowner': (context) =>
             const EmailVerificationForSpaceOwner(),
+        '/reset_password': (context) => const ResetPassword(),
+        '/confirm_email': (context) => const ConfirmEmail(),
+        '/new_password': (context) => const NewPassword(),
       },
     );
   }

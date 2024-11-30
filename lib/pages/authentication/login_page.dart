@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                // Navigate to Forgot Password Screen
+                                Navigator.pushNamed(context, '/reset_password');
                               },
                               child: const Text(
                                 "Forgot Password?",

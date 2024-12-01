@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "659942438218",
+    "project_id": "next-space-fb203",
+    "storage_bucket": "next-space-fb203.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659942438218:android:1f85cf65a9802fd360fdb3",
+        "android_client_info": {
+          "package_name": "com.example.nextspace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI0P0_ZmeKjGK251bSFE_jERXCoBTJkDM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

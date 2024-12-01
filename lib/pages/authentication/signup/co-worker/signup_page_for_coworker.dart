@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nextspace/service/auth_service.dart';
 
 class SignupPageForCoworker extends StatefulWidget {
   const SignupPageForCoworker({super.key});
@@ -16,13 +17,20 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
   final FocusNode _addressFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  AuthService authService = AuthService();
+
   String? _selectedGender = "Male"; // Move this outside the build method
 
   File? _image;
   final picker = ImagePicker();
   String error = '';
+  String? email;
 
-  // Upload Farmer License Image
   Future uploadCitizenship() async {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
@@ -35,6 +43,46 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
         error = "No image selected";
       });
     }
+  }
+
+  Future<void> registerUser() async {
+    if (_fullNameController.text.isNotEmpty &&
+        _phoneController.text.isNotEmpty &&
+        _addressController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _image != null) {
+      try {
+        // Call AuthService to register the user
+        await authService.registerUser(
+          context: context,
+          email: email ?? '',
+          password: _passwordController.text,
+          fullName: _fullNameController.text,
+          phoneNumber: _phoneController.text,
+          gender: _selectedGender ?? 'Male',
+          imageUrl: _image!
+              .path, // You can upload this image to Firebase Storage if required
+          role: 'coworker', // Assuming the role for this user is coworker
+        );
+        Navigator.pushNamed(context, '/emailverification/coworker');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration failed: ${e.toString()}")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Please fill all fields and upload an image")),
+      );
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the email passed from the previous page
+    email = ModalRoute.of(context)?.settings.arguments as String?;
   }
 
   @override
@@ -80,6 +128,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
               // Full Name Field
               TextField(
                 focusNode: _nameFocusNode,
+                controller: _fullNameController,
                 decoration: InputDecoration(
                   labelText: "Full Name",
                   prefixIcon: const Icon(
@@ -103,6 +152,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
               // Phone number Field
               TextField(
                 focusNode: _phoneFocusNode,
+                controller: _phoneController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: "Phone number",
@@ -126,6 +176,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
 
               // Address Field
               TextField(
+                controller: _addressController,
                 focusNode: _addressFocusNode,
                 keyboardType: TextInputType.streetAddress,
                 decoration: InputDecoration(
@@ -257,6 +308,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
 
               // Password Field
               TextField(
+                controller: _passwordController,
                 focusNode: _passwordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
@@ -281,9 +333,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
 
               // Continue Button
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/emailverification/coworker');
-                },
+                onPressed: registerUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   minimumSize: Size(double.infinity, size.height * 0.07),

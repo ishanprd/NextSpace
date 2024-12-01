@@ -9,17 +9,16 @@ class EmailPageForCoworker extends StatefulWidget {
 
 class _EmailPageForCoworkerState extends State<EmailPageForCoworker> {
   final FocusNode _focusNode = FocusNode();
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size; // Get screen size
+    var size = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset:
-          true, // Ensure screen resizes when the keyboard appears
+      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
-        // Ensure content is scrollable when the keyboard is visible
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: size.height * 0.02,
@@ -67,6 +66,7 @@ class _EmailPageForCoworkerState extends State<EmailPageForCoworker> {
               ),
               SizedBox(height: size.height * 0.03),
               TextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 focusNode: _focusNode,
                 decoration: InputDecoration(
@@ -90,7 +90,18 @@ class _EmailPageForCoworkerState extends State<EmailPageForCoworker> {
               SizedBox(height: size.height * 0.02),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/coworker_signup');
+                  String email = _emailController.text;
+                  if (email.isNotEmpty) {
+                    Navigator.pushNamed(
+                      context,
+                      '/coworker_signup',
+                      arguments: email, // Passing email to the next page
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please enter an email")),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nextspace/service/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,6 +11,61 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = false; // Boolean variable for remember me checkbox
   bool _obscureText = true; // Boolean to toggle password visibility
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  AuthService authService = AuthService();
+
+  bool isValidEmail(String email) {
+    RegExp emailRegExp =
+        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    return emailRegExp.hasMatch(email);
+  }
+
+  // Function to validate password length
+  bool isValidPassword(String password) {
+    return password.length >=
+        6; // Ensuring password is at least 6 characters long
+  }
+
+  Future<void> login() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email and password cannot be empty")),
+      );
+      return;
+    }
+
+    if (!isValidEmail(_emailController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid email address")),
+      );
+      return;
+    }
+
+    if (!isValidPassword(_passwordController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Password should be at least 6 characters long")),
+      );
+      return;
+    }
+
+    // If all validations pass, proceed with login
+    try {
+      // Call the login function from AuthService
+      await authService.loginUser(
+        context: context,
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login failed: ${e.toString()}")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: screenHeight * 0.03), // Spacer
                         // Email TextField
                         TextField(
+                          controller: _emailController,
                           decoration: InputDecoration(
                             labelText: "Email",
                             prefixIcon: const Icon(
@@ -186,6 +243,7 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: screenHeight * 0.02), // Spacer
                         // Password TextField
                         TextField(
+                          controller: _passwordController,
                           obscureText:
                               _obscureText, // Toggle password visibility
                           decoration: InputDecoration(
@@ -257,9 +315,7 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: screenHeight * 0.03), // Spacer
                         // Log In Button
                         ElevatedButton(
-                          onPressed: () {
-                            // Log In Logic
-                          },
+                          onPressed: login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent, // Button color
                             minimumSize: Size(double.infinity,

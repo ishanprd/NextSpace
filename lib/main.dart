@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/email_page_for_coworker.dart';
 import 'package:nextspace/pages/authentication/login_page.dart';
@@ -8,8 +9,13 @@ import 'package:nextspace/pages/authentication/signup/space_owner/signup_page_fo
 import 'package:nextspace/pages/authentication/signup/signup_page.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/signup_page_for_coworker.dart';
 import 'package:nextspace/pages/start_page.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );// Initialize Firebase app
   runApp(const NextSpace()); // Run the app, passing the NextSpace widget
 }
 

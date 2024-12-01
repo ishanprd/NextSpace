@@ -42,40 +42,43 @@ class _StartPageState extends State<StartPage> {
             ),
           ),
 
-          // Page view for onboarding screens
-          Positioned.fill(
-            child: PageView(
-              controller:
-                  _pageController, // PageController for handling the page view
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage =
-                      index; // Update current page when PageView changes
-                });
-              },
-              children: const [
-                // First onboarding screen
-                OnboardingScreen(
-                  image: 'assets/onboardingimageone.jpg',
-                  title: 'Welcome to Next Space',
-                  subtitle:
-                      'Discover a place where creativity meets productivity. Enjoy a flexible, inspiring environment tailored to your needs.',
-                ),
-                // Second onboarding screen
-                OnboardingScreen(
-                  image: 'assets/onboardingimagetwo.jpg',
-                  title: 'Flexible Plans for Everyone',
-                  subtitle:
-                      'Whether you`re a freelancer, startup, or remote team, we have the perfect space to suit your work style',
-                ),
-                // Third onboarding screen
-                OnboardingScreen(
-                  image: 'assets/onboardingimagethree.jpg',
-                  title: 'Community & Networking',
-                  subtitle:
-                      'Collaborate with like-minded professionals, attend events, and expand your network in an inspiring environment.',
-                ),
-              ],
+          // Centered Page view for onboarding screens
+          Center(
+            child: SizedBox(
+              height: size.height * 0.7, // Adjust height for responsiveness
+              child: PageView(
+                controller:
+                    _pageController, // PageController for handling the page view
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage =
+                        index; // Update current page when PageView changes
+                  });
+                },
+                children: const [
+                  // First onboarding screen
+                  OnboardingScreen(
+                    image: 'assets/onboardingimageone.jpg',
+                    title: 'Welcome to Next Space',
+                    subtitle:
+                        'Discover a place where creativity meets productivity. Enjoy a flexible, inspiring environment tailored to your needs.',
+                  ),
+                  // Second onboarding screen
+                  OnboardingScreen(
+                    image: 'assets/onboardingimagetwo.jpg',
+                    title: 'Flexible Plans for Everyone',
+                    subtitle:
+                        'Whether you`re a freelancer, startup, or remote team, we have the perfect space to suit your work style',
+                  ),
+                  // Third onboarding screen
+                  OnboardingScreen(
+                    image: 'assets/onboardingimagethree.jpg',
+                    title: 'Community & Networking',
+                    subtitle:
+                        'Collaborate with like-minded professionals, attend events, and expand your network in an inspiring environment.',
+                  ),
+                ],
+              ),
             ),
           ),
 

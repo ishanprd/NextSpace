@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
@@ -8,6 +9,23 @@ class ResetPassword extends StatefulWidget {
 }
 
 class _ResetPasswordState extends State<ResetPassword> {
+  final TextEditingController _emailController = TextEditingController();
+
+  Future<void> _resetPassword() async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _emailController.text.trim(),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent!')),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Failed to reset password!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size; // Get screen size
@@ -19,7 +37,6 @@ class _ResetPasswordState extends State<ResetPassword> {
       resizeToAvoidBottomInset:
           true, // Ensure screen resizes when the keyboard appears
       body: SingleChildScrollView(
-        // Ensure content is scrollable when the keyboard is visible
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: height * 0.02,
@@ -37,14 +54,13 @@ class _ResetPasswordState extends State<ResetPassword> {
               Text(
                 'Reset Your Password',
                 style: TextStyle(
-                  fontSize: width *
-                      0.08, // Dynamically adjust font size based on screen width
+                  fontSize: width * 0.08, // Dynamically adjust font size
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: height * 0.01),
               Text(
-                'Enter your email adress below and we`ll send you a link with instructions',
+                'Enter your email address below and we\'ll send you a link with instructions',
                 style: TextStyle(
                   fontSize: width * 0.04,
                 ),
@@ -52,7 +68,7 @@ class _ResetPasswordState extends State<ResetPassword> {
               ),
               SizedBox(height: height * 0.02),
 
-              // Align the 'Enter Verification Code' label to the left
+              // Align the 'Email Address' label to the left
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -65,10 +81,10 @@ class _ResetPasswordState extends State<ResetPassword> {
               ),
               SizedBox(height: height * 0.02),
 
-              // Input fields for verification code (5-digit example)
+              // Email Input Field
               TextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                focusNode: FocusNode(),
                 decoration: InputDecoration(
                   labelText: "Email",
                   prefixIcon: const Icon(
@@ -89,11 +105,9 @@ class _ResetPasswordState extends State<ResetPassword> {
               ),
               SizedBox(height: height * 0.03),
 
-              // Verification Button
+              // Reset Password Button
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/confirm_email');
-                },
+                onPressed: _resetPassword, // Call reset password function
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   minimumSize: Size(double.infinity, height * 0.07),
@@ -104,7 +118,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                 child: Text(
                   "Send Verification Code",
                   style: TextStyle(
-                    fontSize: width * 0.05, // Dynamic font size for button text
+                    fontSize: width * 0.05, // Dynamic font size
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),

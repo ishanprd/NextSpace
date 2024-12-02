@@ -57,7 +57,7 @@ class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book_online),
-            label: "view space",
+            label: "Management",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),

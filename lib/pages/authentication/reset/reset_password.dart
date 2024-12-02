@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:nextspace/validation/check_email_exits.dart';
+import 'package:nextspace/validation/email_validation.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
@@ -11,14 +13,23 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   final TextEditingController _emailController = TextEditingController();
 
-  Future<void> _resetPassword() async {
+  Future<void> _resetPassword(email) async {
+    bool exist = await checkEmailExists(_emailController.text);
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _emailController.text.trim(),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent!')),
-      );
+      if (exist) {
+        await FirebaseAuth.instance.sendPasswordResetEmail(
+          email: _emailController.text.trim(),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Password reset email sent!. check your email')),
+        );
+        Navigator.pushNamed(context, '/login');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Given email hasn`t registered yet')),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Failed to reset password!')),
@@ -107,7 +118,22 @@ class _ResetPasswordState extends State<ResetPassword> {
 
               // Reset Password Button
               ElevatedButton(
-                onPressed: _resetPassword, // Call reset password function
+                onPressed: () {
+                  String email = _emailController.text;
+                  if (email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please enter an email")),
+                    );
+                  } else if (!isValidEmail(email)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Please enter a valid email")),
+                    );
+                  } else {
+                    _resetPassword(email); // Only send email if valid
+                  }
+                },
+                // Call reset password function
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   minimumSize: Size(double.infinity, height * 0.07),

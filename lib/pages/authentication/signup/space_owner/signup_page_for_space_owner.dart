@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nextspace/service/auth_service.dart';
 
 class SignupPageForSpaceOwner extends StatefulWidget {
   const SignupPageForSpaceOwner({super.key});
@@ -17,13 +18,20 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
   final FocusNode _addressFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  AuthService authService = AuthService();
+
   String? _selectedGender = "Male"; // Move this outside the build method
 
   File? _image;
   final picker = ImagePicker();
   String error = '';
+  String? email;
 
-  // Upload Farmer License Image
   Future uploadCitizenship() async {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
@@ -36,6 +44,70 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
         error = "No image selected";
       });
     }
+  }
+
+  Future<void> registerUser() async {
+    if (_fullNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter your full name")),
+      );
+      return;
+    }
+
+    if (_phoneController.text.isEmpty || _phoneController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid phone number")),
+      );
+      return;
+    }
+
+    if (_addressController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter your address")),
+      );
+      return;
+    }
+
+    if (_passwordController.text.isEmpty ||
+        _passwordController.text.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 8 characters")),
+      );
+      return;
+    }
+
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please upload your citizenship image")),
+      );
+      return;
+    }
+
+    try {
+      // Call AuthService to register the user
+      await authService.registerUser(
+        context: context,
+        email: email ?? '',
+        password: _passwordController.text,
+        fullName: _fullNameController.text,
+        phoneNumber: _phoneController.text,
+        gender: _selectedGender ?? 'Male',
+        imageUrl: _image!.path, // Upload image to Firebase Storage if needed
+        role: 'coworker', // Assuming role is coworker
+      );
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Registration failed: ${e.toString()}")),
+      );
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the email passed from the previous page
+    email = ModalRoute.of(context)?.settings.arguments as String?;
   }
 
   @override
@@ -81,6 +153,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
               // Full Name Field
               TextField(
                 focusNode: _nameFocusNode,
+                controller: _fullNameController,
                 decoration: InputDecoration(
                   labelText: "Full Name",
                   prefixIcon: const Icon(
@@ -104,6 +177,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
               // Phone number Field
               TextField(
                 focusNode: _phoneFocusNode,
+                controller: _phoneController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: "Phone number",
@@ -127,6 +201,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
 
               // Address Field
               TextField(
+                controller: _addressController,
                 focusNode: _addressFocusNode,
                 keyboardType: TextInputType.streetAddress,
                 decoration: InputDecoration(
@@ -249,7 +324,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
                         fontStyle: FontStyle.italic,
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Colors.green,
+                        color: Colors.blueAccent,
                       ),
                     ),
                 ],
@@ -258,6 +333,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
 
               // Password Field
               TextField(
+                controller: _passwordController,
                 focusNode: _passwordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
@@ -282,9 +358,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
 
               // Continue Button
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/emailverification/spaceowner');
-                },
+                onPressed: registerUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   minimumSize: Size(double.infinity, size.height * 0.07),

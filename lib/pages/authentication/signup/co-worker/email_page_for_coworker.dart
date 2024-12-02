@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nextspace/validation/check_email_exits.dart';
+import 'package:nextspace/validation/email_validation.dart';
 
 class EmailPageForCoworker extends StatefulWidget {
   const EmailPageForCoworker({super.key});
@@ -89,17 +91,23 @@ class _EmailPageForCoworkerState extends State<EmailPageForCoworker> {
               ),
               SizedBox(height: size.height * 0.02),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   String email = _emailController.text;
-                  if (email.isNotEmpty) {
+                  bool exist = await checkEmailExists(email);
+                  if (email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please enter an email")),
+                    );
+                  } else if (!isValidEmail(email)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Please enter a valid email")),
+                    );
+                  } else if (!exist) {
                     Navigator.pushNamed(
                       context,
                       '/coworker_signup',
                       arguments: email, // Passing email to the next page
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please enter an email")),
                     );
                   }
                 },

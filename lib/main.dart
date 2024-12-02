@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:nextspace/pages/authentication/reset/confirm_email.dart';
-import 'package:nextspace/pages/authentication/reset/new_password.dart';
+import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';
+
 import 'package:nextspace/pages/authentication/reset/reset_password.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/email_page_for_coworker.dart';
 import 'package:nextspace/pages/authentication/login_page.dart';
@@ -18,7 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  );// Initialize Firebase app
+  ); // Initialize Firebase app
   runApp(const NextSpace()); // Run the app, passing the NextSpace widget
 }
 
@@ -52,8 +52,8 @@ class NextSpace extends StatelessWidget {
         '/emailverification/spaceowner': (context) =>
             const EmailVerificationForSpaceOwner(),
         '/reset_password': (context) => const ResetPassword(),
-        '/confirm_email': (context) => const ConfirmEmail(),
-        '/new_password': (context) => const NewPassword(),
+
+        '/coworker_dashboard': (context) => const CoworkerDashboard(),
       },
     );
   }

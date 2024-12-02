@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nextspace/service/auth_service.dart';
+import 'package:nextspace/validation/email_validation.dart';
+import 'package:nextspace/validation/password_validation.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,18 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   AuthService authService = AuthService();
-
-  bool isValidEmail(String email) {
-    RegExp emailRegExp =
-        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
-    return emailRegExp.hasMatch(email);
-  }
-
-  // Function to validate password length
-  bool isValidPassword(String password) {
-    return password.length >=
-        6; // Ensuring password is at least 6 characters long
-  }
 
   Future<void> login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -47,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!isValidPassword(_passwordController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Password should be at least 6 characters long")),
+            content: Text("Password should be at least 8 characters long")),
       );
       return;
     }
@@ -61,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login failed: ${e.toString()}")),
       );

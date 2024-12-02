@@ -46,34 +46,58 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
   }
 
   Future<void> registerUser() async {
-    if (_fullNameController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty &&
-        _addressController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty &&
-        _image != null) {
-      try {
-        // Call AuthService to register the user
-        await authService.registerUser(
-          context: context,
-          email: email ?? '',
-          password: _passwordController.text,
-          fullName: _fullNameController.text,
-          phoneNumber: _phoneController.text,
-          gender: _selectedGender ?? 'Male',
-          imageUrl: _image!
-              .path, // You can upload this image to Firebase Storage if required
-          role: 'coworker', // Assuming the role for this user is coworker
-        );
-        Navigator.pushNamed(context, '/emailverification/coworker');
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration failed: ${e.toString()}")),
-        );
-      }
-    } else {
+    if (_fullNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Please fill all fields and upload an image")),
+        const SnackBar(content: Text("Please enter your full name")),
+      );
+      return;
+    }
+
+    if (_phoneController.text.isEmpty || _phoneController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid phone number")),
+      );
+      return;
+    }
+
+    if (_addressController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter your address")),
+      );
+      return;
+    }
+
+    if (_passwordController.text.isEmpty ||
+        _passwordController.text.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 8 characters")),
+      );
+      return;
+    }
+
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please upload your citizenship image")),
+      );
+      return;
+    }
+
+    try {
+      // Call AuthService to register the user
+      await authService.registerUser(
+        context: context,
+        email: email ?? '',
+        password: _passwordController.text,
+        fullName: _fullNameController.text,
+        phoneNumber: _phoneController.text,
+        gender: _selectedGender ?? 'Male',
+        imageUrl: _image!.path, // Upload image to Firebase Storage if needed
+        role: 'coworker', // Assuming role is coworker
+      );
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Registration failed: ${e.toString()}")),
       );
     }
   }
@@ -299,7 +323,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
                         fontStyle: FontStyle.italic,
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Colors.green,
+                        color: Colors.blueAccent,
                       ),
                     ),
                 ],

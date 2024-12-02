@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nextspace/validation/check_email_exits.dart';
+import 'package:nextspace/validation/email_validation.dart';
 
 class EmailPageSpaceOwner extends StatefulWidget {
   const EmailPageSpaceOwner({super.key});
@@ -9,17 +11,16 @@ class EmailPageSpaceOwner extends StatefulWidget {
 
 class _EmailPageSpaceOwnerState extends State<EmailPageSpaceOwner> {
   final FocusNode _focusNode = FocusNode();
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size; // Get screen size
+    var size = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset:
-          true, // Ensure screen resizes when the keyboard appears
+      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
-        // Ensure content is scrollable when the keyboard is visible
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: size.height * 0.02,
@@ -67,6 +68,8 @@ class _EmailPageSpaceOwnerState extends State<EmailPageSpaceOwner> {
               ),
               SizedBox(height: size.height * 0.03),
               TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   labelText: "Email",
@@ -88,8 +91,25 @@ class _EmailPageSpaceOwnerState extends State<EmailPageSpaceOwner> {
               ),
               SizedBox(height: size.height * 0.02),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/spaceowner_signup');
+                onPressed: () async {
+                  String email = _emailController.text;
+                  bool exist = await checkEmailExists(email);
+                  if (email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please enter an email")),
+                    );
+                  } else if (!isValidEmail(email)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Please enter a valid email")),
+                    );
+                  } else if (!exist) {
+                    Navigator.pushNamed(
+                      context,
+                      '/coworker_signup',
+                      arguments: email, // Passing email to the next page
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,

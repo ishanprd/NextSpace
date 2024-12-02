@@ -34,11 +34,11 @@ class AuthService {
         'uid': user.uid,
         'fullName': fullName,
         'email': email,
-        'phoneNumber': phoneNumber,
-        'password': password, // Avoid storing plaintext in production!
+        'phoneNumber': phoneNumber, // Avoid storing plaintext in production!
         'gender': gender,
         'imageUrl': imageUrl,
         'role': role,
+        'password': password,
         'isVerified': false,
       });
       // Send email verification

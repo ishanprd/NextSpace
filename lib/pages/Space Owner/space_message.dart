@@ -32,7 +32,8 @@ class _SpaceMessageState extends State<SpaceMessage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
-        title: const Text('Messages'),
+        title: const Center(child: Text('Messages')),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

@@ -36,7 +36,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
       "userPhoto": "assets/userprofile3.jpg",
       "price": 2000,
       "peopleCount": 10,
-      "status": "Completed",
+      "status": "Accepted",
       "spaceName": "Event Hall C"
     },
   ];
@@ -88,15 +88,12 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset(
-            'assets/email.png',
-            fit: BoxFit.cover,
-          ), // Replace with your logo
-        ),
         automaticallyImplyLeading: false, // Remove the back button
-        title: const Center(child: Text("Space Management")),
+        title: const Center(
+            child: Text(
+          "Space Management",
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+        )),
         elevation: 0, // Removes shadow below the app bar
         bottom: TabBar(
           controller: _tabController,

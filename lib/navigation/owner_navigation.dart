@@ -14,7 +14,7 @@ class SpaceOwnerNavigation extends StatefulWidget {
 
 class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
   int myIndex = 0;
-  final PageController _pageController = PageController(initialPage: 2);
+  final PageController _pageController = PageController(initialPage: 0);
 
   final List<Widget> screenList = [
     const SpaceOwnerDashboard(),
@@ -56,7 +56,7 @@ class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
             label: "My Space",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book_online),
+            icon: Icon(Icons.manage_accounts),
             label: "Management",
           ),
           BottomNavigationBarItem(

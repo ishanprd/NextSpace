@@ -14,14 +14,14 @@ class _SpaceSettingState extends State<SpaceSetting> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushNamed(context,
-                '/space_owner'); // Navigates back to the previous screen
-          },
+        automaticallyImplyLeading: false,
+        // ignore: prefer_const_constructors
+        title: Center(
+          child: const Text(
+            'Settings',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+          ),
         ),
-        title: const Text('Settings'),
       ),
       body: ListView(
         children: [

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class SpaceFeedback extends StatefulWidget {
+  const SpaceFeedback({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<SpaceFeedback> createState() => _SpaceFeedbackState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _SpaceFeedbackState extends State<SpaceFeedback> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile Page"),
+        title: const Text("Feedback"),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -22,8 +22,8 @@ class _ProfilePageState extends State<ProfilePage> {
               borderRadius: BorderRadius.circular(12),
             ),
             elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            child: const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -34,10 +34,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         backgroundImage: NetworkImage(
                             'https://via.placeholder.com/150'), // Replace with actual image URL
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             'Jerome Bell',
                             style: TextStyle(
@@ -55,47 +55,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.more_horiz),
-                      ),
+                      Spacer(),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
+                  SizedBox(height: 12),
+                  Text(
                     'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. '
                     'Velit officia consequat duis enim velit mollit. Exercitation veniam '
                     'consequat sunt nostrud amet.',
                     style: TextStyle(fontSize: 14),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.favorite_border, size: 20),
-                          SizedBox(width: 4),
-                          Text('816'),
-                        ],
-                      ),
-                      Row(
-                        children: const [
-                          Icon(Icons.share_outlined, size: 20),
-                          SizedBox(width: 4),
-                          Text('877'),
-                        ],
-                      ),
-                      Row(
-                        children: const [
-                          Icon(Icons.comment_outlined, size: 20),
-                          SizedBox(width: 4),
-                          Text('185'),
-                        ],
-                      ),
-                    ],
-                  ),
+                  SizedBox(height: 16),
                 ],
               ),
             ),

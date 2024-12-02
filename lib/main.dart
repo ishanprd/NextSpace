@@ -1,8 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:nextspace/navigation/owner_navigation.dart';
-import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';
-
+import 'package:nextspace/pages/Space%20Owner/chat/conversation.dart';
+import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
+import 'firebase_options.dart';
+import 'package:nextspace/pages/start_page.dart';
 import 'package:nextspace/pages/authentication/reset/reset_password.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/email_page_for_coworker.dart';
 import 'package:nextspace/pages/authentication/login_page.dart';
@@ -12,8 +13,10 @@ import 'package:nextspace/pages/authentication/signup/space_owner/email_verifica
 import 'package:nextspace/pages/authentication/signup/space_owner/signup_page_for_space_owner.dart';
 import 'package:nextspace/pages/authentication/signup/signup_page.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/signup_page_for_coworker.dart';
-import 'package:nextspace/pages/start_page.dart';
-import 'firebase_options.dart';
+import 'package:nextspace/navigation/owner_navigation.dart';
+import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';
+import 'package:nextspace/pages/Space%20Owner/setting/edit_profile.dart';
+import 'package:nextspace/pages/Space%20Owner/setting/feedback.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,9 +56,12 @@ class NextSpace extends StatelessWidget {
         '/emailverification/spaceowner': (context) =>
             const EmailVerificationForSpaceOwner(),
         '/reset_password': (context) => const ResetPassword(),
-
         '/coworker_dashboard': (context) => const CoworkerDashboard(),
         '/space_owner': (context) => const SpaceOwnerNavigation(),
+        '/edit_profile': (context) => const EditProfile(),
+        '/feedback': (context) => const SpaceFeedback(),
+        '/notifications': (context) => const SpaceNotification(),
+        '/conversations': (context) => const Conversation(),
       },
     );
   }

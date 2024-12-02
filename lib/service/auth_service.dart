@@ -9,7 +9,7 @@ class AuthService {
 
   // Register user
   Future<void> registerUser({
-    required BuildContext context,
+    required context,
     required String email,
     required String password,
     required String fullName,
@@ -71,7 +71,7 @@ class AuthService {
 
   // Log in user
   Future<void> loginUser({
-    required BuildContext context,
+    required context,
     required String email,
     required String password,
   }) async {
@@ -122,9 +122,9 @@ class AuthService {
 
       // Navigate to the respective dashboard based on the role
       if (role == 'coworker') {
-        Navigator.pushReplacementNamed(context, '/coworker_dashboard');
+        Navigator.pushNamed(context, '/coworker_dashboard');
       } else if (role == 'space_owner') {
-        Navigator.pushReplacementNamed(context, '/space_owner');
+        Navigator.pushNamed(context, '/space_owner');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Unknown role: $role")),
@@ -138,7 +138,8 @@ class AuthService {
   }
 
   // Log out user
-  Future<void> signOut() async {
+  Future<void> signOut(context) async {
     await _auth.signOut();
+    Navigator.pushReplacementNamed(context, '/login');
   }
 }

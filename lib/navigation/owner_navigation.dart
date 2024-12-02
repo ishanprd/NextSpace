@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nextspace/pages/Space%20Owner/booking.dart';
-import 'package:nextspace/pages/Space%20Owner/space_feedback.dart';
+import 'package:nextspace/pages/Space%20Owner/space_message.dart';
 import 'package:nextspace/pages/Space%20Owner/space_owner_dashboard.dart';
 import 'package:nextspace/pages/Space%20Owner/space_page.dart';
-import 'package:nextspace/pages/Space%20Owner/space_profile.dart';
+import 'package:nextspace/pages/Space%20Owner/space_setting.dart';
 
 class SpaceOwnerNavigation extends StatefulWidget {
   const SpaceOwnerNavigation({super.key});
@@ -13,15 +13,15 @@ class SpaceOwnerNavigation extends StatefulWidget {
 }
 
 class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
-  int myIndex = 2;
+  int myIndex = 0;
   final PageController _pageController = PageController(initialPage: 2);
 
   final List<Widget> screenList = [
     const SpaceOwnerDashboard(),
     const SpacePage(),
     const Booking(),
-    const SpaceFeedback(),
-    const SpaceProfile(),
+    const SpaceMessage(),
+    const SpaceSetting(),
   ];
 
   void onTabTapped(int index) {
@@ -60,12 +60,12 @@ class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
             label: "view space",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.feedback_rounded),
-            label: "Feed back",
+            icon: Icon(Icons.message),
+            label: "Message",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_box_sharp),
-            label: "My Account",
+            icon: Icon(Icons.settings_rounded),
+            label: "Setting",
           ),
         ],
       ),

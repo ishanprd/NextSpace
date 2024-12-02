@@ -93,7 +93,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
         phoneNumber: _phoneController.text,
         gender: _selectedGender ?? 'Male',
         imageUrl: _image!.path, // Upload image to Firebase Storage if needed
-        role: 'coworker', // Assuming role is coworker
+        role: 'space_owner', // Assuming role is coworker
       );
       Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {

@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:nextspace/navigation/owner_navigation.dart';
 import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';
 
 import 'package:nextspace/pages/authentication/reset/reset_password.dart';
@@ -54,6 +55,7 @@ class NextSpace extends StatelessWidget {
         '/reset_password': (context) => const ResetPassword(),
 
         '/coworker_dashboard': (context) => const CoworkerDashboard(),
+        '/space_owner': (context) => const SpaceOwnerNavigation(),
       },
     );
   }

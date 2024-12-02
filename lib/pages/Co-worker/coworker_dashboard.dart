@@ -11,7 +11,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Text("Coworker dashboard"),
+      body: Center(child: Text("Coworker dashboard")),
     );
   }
 }

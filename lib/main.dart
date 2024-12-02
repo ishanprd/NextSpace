@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nextspace/pages/Space%20Owner/chat/conversation.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
+import 'package:nextspace/pages/Space%20Owner/space/create_space.dart';
+import 'package:nextspace/pages/Space%20Owner/space/view_space.dart';
 import 'firebase_options.dart';
 import 'package:nextspace/pages/start_page.dart';
 import 'package:nextspace/pages/authentication/reset/reset_password.dart';
@@ -62,6 +64,8 @@ class NextSpace extends StatelessWidget {
         '/feedback': (context) => const SpaceFeedback(),
         '/notifications': (context) => const SpaceNotification(),
         '/conversations': (context) => const Conversation(),
+        '/create_space': (context) => const CreateSpace(),
+        '/view_space': (context) => const ViewSpace(),
       },
     );
   }

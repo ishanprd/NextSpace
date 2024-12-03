@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nextspace/pages/Co-worker/booking_history.dart';
 import 'package:nextspace/pages/Co-worker/chat.dart';
 import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';
-import 'package:nextspace/pages/Co-worker/profile_page.dart';
+import 'package:nextspace/pages/Co-worker/setting.dart';
 import 'package:nextspace/pages/Co-worker/search_space.dart';
 
 class CoworkerNavigation extends StatefulWidget {
@@ -19,7 +19,7 @@ class _CoworkerNavigationState extends State<CoworkerNavigation> {
     const SearchSpace(),
     const BookingHistory(),
     const Chat(),
-    const ProfilePage()
+    const CoWorkerSetting()
   ];
   @override
   Widget build(BuildContext context) {

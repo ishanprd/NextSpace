@@ -13,7 +13,7 @@ class CoworkerNavigation extends StatefulWidget {
 }
 
 class _CoworkerNavigationState extends State<CoworkerNavigation> {
-  int myIndex = 2;
+  int myIndex = 0;
   List screenList = [
     const CoworkerDashboard(),
     const SearchSpace(),
@@ -38,24 +38,24 @@ class _CoworkerNavigationState extends State<CoworkerNavigation> {
         unselectedItemColor: Colors.black, // Unselected item color
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: "Categories",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: "My Order",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
+            icon: Icon(Icons.home),
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_shopping_cart),
-            label: "My Cart",
+            icon: Icon(Icons.search),
+            label: "Search",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: "My Account",
+            icon: Icon(Icons.history),
+            label: "Booking History",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: "Chats",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Settings",
           ),
         ],
       ),

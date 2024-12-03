@@ -125,6 +125,8 @@ class AuthService {
         Navigator.pushNamed(context, '/coworker_dashboard');
       } else if (role == 'space_owner') {
         Navigator.pushNamed(context, '/space_owner');
+      } else if (role == 'admin') {
+        Navigator.pushNamed(context, '/admin');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Unknown role: $role")),

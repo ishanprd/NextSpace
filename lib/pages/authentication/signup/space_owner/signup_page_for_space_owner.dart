@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -26,17 +27,20 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
   AuthService authService = AuthService();
 
   String? _selectedGender = "Male"; // Move this outside the build method
-
+  String _base64Image = "";
   File? _image;
   final picker = ImagePicker();
   String error = '';
   String? email;
 
   Future uploadCitizenship() async {
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
+    final XFile? pickedImage2 =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage2 != null) {
+      final bytes = await pickedImage2.readAsBytes();
       setState(() {
-        _image = File(pickedImage.path);
+        _image = File(pickedImage2.path);
+        _base64Image = base64Encode(bytes);
         error = ''; // Clear previous error if image is selected
       });
     } else {
@@ -92,7 +96,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
         fullName: _fullNameController.text,
         phoneNumber: _phoneController.text,
         gender: _selectedGender ?? 'Male',
-        imageUrl: _image!.path, // Upload image to Firebase Storage if needed
+        imageUrl: _base64Image, // Upload image to Firebase Storage if needed
         role: 'space_owner', // Assuming role is coworker
       );
       Navigator.pushReplacementNamed(context, '/login');
@@ -307,7 +311,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  if (_image == null)
+                  if (_base64Image.isEmpty)
                     Text(
                       error,
                       style: const TextStyle(

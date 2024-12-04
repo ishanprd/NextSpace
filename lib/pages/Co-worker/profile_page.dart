@@ -29,15 +29,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 20,
                         backgroundImage: NetworkImage(
                             'https://via.placeholder.com/150'), // Replace with actual image URL
                       ),
                       const SizedBox(width: 12),
-                      Column(
+                      const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             'Jerome Bell',
                             style: TextStyle(
@@ -70,25 +70,25 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 16),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
-                        children: const [
+                        children: [
                           Icon(Icons.favorite_border, size: 20),
                           SizedBox(width: 4),
                           Text('816'),
                         ],
                       ),
                       Row(
-                        children: const [
+                        children: [
                           Icon(Icons.share_outlined, size: 20),
                           SizedBox(width: 4),
                           Text('877'),
                         ],
                       ),
                       Row(
-                        children: const [
+                        children: [
                           Icon(Icons.comment_outlined, size: 20),
                           SizedBox(width: 4),
                           Text('185'),

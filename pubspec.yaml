@@ -35,7 +35,9 @@ dependencies:
   cloud_firestore:
   google_sign_in:
   cloud_functions:
-  flutter_email_sender: 
+  flutter_email_sender:
+  geolocator:
+  google_maps_flutter:
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SpaceManage extends StatefulWidget {
   const SpaceManage({super.key});
@@ -11,52 +15,19 @@ class _SpaceManageState extends State<SpaceManage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Sample lists for different order statuses
-  List<Map<String, dynamic>> activeRequests = [
-    {
-      "userName": "John Doe",
-      "userPhoto": "assets/userprofile.jpg", // User photo asset path
-      "price": 1500,
-      "peopleCount": 5,
-      "status": "Pending",
-      "spaceName": "Conference Hall A"
-    },
-    {
-      "userName": "Jane Smith",
-      "userPhoto": "assets/userprofile2.jpg",
-      "price": 1000,
-      "peopleCount": 3,
-      "status": "Pending",
-      "spaceName": "Meeting Room B"
-    },
-  ];
+  // Lists to store spaces based on their status
+  List<Map<String, dynamic>> activeRequests = [];
+  List<Map<String, dynamic>> bookingSpace = [];
+  List<Map<String, dynamic>> cancelledBookings = [];
 
-  List<Map<String, dynamic>> bookingSpace = [
-    {
-      "userName": "Alice Johnson",
-      "userPhoto": "assets/userprofile3.jpg",
-      "price": 2000,
-      "peopleCount": 10,
-      "status": "Accepted",
-      "spaceName": "Event Hall C"
-    },
-  ];
-
-  List<Map<String, dynamic>> cancelledBookings = [
-    {
-      "userName": "Bob Williams",
-      "userPhoto": "assets/userprofile4.jpg",
-      "price": 1200,
-      "peopleCount": 4,
-      "status": "Cancelled",
-      "spaceName": "Workspace D"
-    },
-  ];
+  // Loading state
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this); // 3 tabs
+    _fetchSpaces(); // Fetch spaces from Firestore
   }
 
   @override
@@ -65,24 +36,60 @@ class _SpaceManageState extends State<SpaceManage>
     super.dispose();
   }
 
-  // Function to handle accepting a booking request
-  void acceptRequest(int index) {
-    setState(() {
-      activeRequests[index]["status"] = "Accepted";
-    });
-  }
+  // Fetch spaces and owners from Firestore based on their status
+  Future<void> _fetchSpaces() async {
+    try {
+      // Fetch spaces
+      QuerySnapshot spacesSnapshot =
+          await FirebaseFirestore.instance.collection('spaces').get();
+      //fetch the space data
+      List<Map<String, dynamic>> spaces = spacesSnapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'spaceName': doc['spaceName'],
+          'monthlyPrice': doc['monthlyPrice'],
+          'status': doc['status'],
+          'ownerId': doc['ownerId'],
+        };
+      }).toList();
 
-  // Function to delete a request
-  void deleteRequest(String listType, int index) {
-    setState(() {
-      if (listType == "Requests") {
-        activeRequests.removeAt(index);
-      } else if (listType == "Space") {
-        bookingSpace.removeAt(index);
-      } else if (listType == "Cancelled") {
-        cancelledBookings.removeAt(index);
+      // Fetch the id of owner
+      Set ownerIds = spaces.map((space) => space['ownerId']).toSet();
+//fetch the user
+      QuerySnapshot ownersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'space_owner')
+          .where('uid', whereIn: ownerIds.toList())
+          .get();
+
+      Map<String, Map<String, dynamic>> owners = {
+        for (var doc in ownersSnapshot.docs)
+          doc.id: doc.data() as Map<String, dynamic>
+      };
+
+      // Combine spaces with their owners
+      for (var space in spaces) {
+        space['ownerName'] = owners[space['ownerId']]?['fullName'] ?? 'Unknown';
+        space['ownerPhoto'] =
+            owners[space['ownerId']]?['image'] ?? 'assets/userprofile.jpg';
       }
-    });
+
+      // Split spaces into different categories
+      setState(() {
+        activeRequests =
+            spaces.where((space) => space['status'] == 'Pending').toList();
+        bookingSpace =
+            spaces.where((space) => space['status'] == 'Accepted').toList();
+        cancelledBookings =
+            spaces.where((space) => space['status'] == 'Cancelled').toList();
+        isLoading = false; // Set loading to false when data is fetched
+      });
+    } catch (e) {
+      print("Error fetching spaces: $e");
+      setState(() {
+        isLoading = false; // Set loading to false even if there's an error
+      });
+    }
   }
 
   @override
@@ -105,18 +112,43 @@ class _SpaceManageState extends State<SpaceManage>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Requests Tab
-          _buildOrderList("Requests"),
-          // Booking Space Tab
-          _buildOrderList("Space"),
-          // Cancelled Bookings Tab
-          _buildOrderList("Cancelled"),
-        ],
-      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator()) // Show loading spinner
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                // Active Requests Tab
+                _buildOrderList("Requests"),
+                // Booking Space Tab
+                _buildOrderList("Space"),
+                // Cancelled Bookings Tab
+                _buildOrderList("Cancelled"),
+              ],
+            ),
     );
+  }
+
+  Future<void> updateSpaceStatus(String spaceId, String newStatus) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('spaces') // Replace 'spaces' with your collection name
+          .doc(spaceId) // Use the document ID of the space
+          .update({'status': newStatus}); // Update the status field
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Space status updated to $newStatus")),
+      );
+
+      // Refresh the spaces after the update
+      await _fetchSpaces();
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update space status: $e")),
+      );
+    }
   }
 
   // Reusable widget to build order lists
@@ -142,24 +174,42 @@ class _SpaceManageState extends State<SpaceManage>
           : ListView.builder(
               itemCount: orders.length,
               itemBuilder: (context, index) {
+                final user = orders[index];
+                final base64Image = user['ownerPhoto'];
+
+                Uint8List? imageBytes;
+
+                if (base64Image.isNotEmpty) {
+                  try {
+                    imageBytes =
+                        base64Decode(base64Image); // Decode base64 image data
+                  } catch (e) {
+                    print('Error decoding base64: $e');
+                    imageBytes = null; // Handle decoding error
+                  }
+                }
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: AssetImage(orders[index]["userPhoto"]),
+                      backgroundImage: imageBytes != null
+                          ? MemoryImage(imageBytes) // Display decoded image
+                          : const AssetImage('assets/userprofile.jpg')
+                              as ImageProvider,
                       radius: 25,
                     ),
                     title: Text(
-                      orders[index]["userName"],
+                      orders[index]["ownerName"] ?? 'Anonymous',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Space: ${orders[index]['spaceName']}"),
-                        Text("People: ${orders[index]['peopleCount']}"),
-                        Text("Price: Rs. ${orders[index]['price']}"),
-                        Text("Status: ${orders[index]['status']}"),
+                        Text(
+                            "Space: ${orders[index]['spaceName'] ?? 'Unknown'}"),
+                        Text(
+                            "Price: Rs. ${orders[index]['monthlyPrice'] ?? 'N/A'}"),
+                        Text("Status: ${orders[index]['status'] ?? 'Unknown'}"),
                       ],
                     ),
                     trailing: listType == "Requests"
@@ -169,15 +219,19 @@ class _SpaceManageState extends State<SpaceManage>
                               IconButton(
                                 icon: const Icon(Icons.check,
                                     color: Colors.green),
-                                onPressed: () {
-                                  acceptRequest(index);
+                                onPressed: () async {
+                                  // Add accept request logic here
+                                  updateSpaceStatus(
+                                      orders[index]['id'], 'Accepted');
                                 },
                               ),
                               IconButton(
                                 icon:
                                     const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  deleteRequest(listType, index);
+                                onPressed: () async {
+                                  // Add delete request logic here
+                                  await updateSpaceStatus(
+                                      orders[index]['id'], 'Cancelled');
                                 },
                               ),
                             ],

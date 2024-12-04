@@ -17,6 +17,7 @@ class AuthService {
     required String gender,
     required String imageUrl,
     required String role,
+    required String image,
   }) async {
     try {
       // Firebase Authentication - Create User
@@ -36,6 +37,7 @@ class AuthService {
         'email': email,
         'phoneNumber': phoneNumber, // Avoid storing plaintext in production!
         'gender': gender,
+        'image': image,
         'imageUrl': imageUrl,
         'role': role,
         'password': password,

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,8 +16,6 @@ class EditAdminProfile extends StatefulWidget {
 
 class _EditAdminProfileState extends State<EditAdminProfile> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
   String _selectedGender = 'Male'; // Default gender
@@ -29,6 +27,34 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
   final picker = ImagePicker();
   String error = '';
   String? email;
+
+  Future<void> uploadimage() async {
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      final bytes = await pickedImage.readAsBytes();
+      final image = img.decodeImage(Uint8List.fromList(bytes));
+      if (image != null) {
+        // Resize image (example: 800px wide, maintaining aspect ratio)
+        final resizedImage = img.copyResize(image, width: 800);
+
+        // Convert resized image to bytes
+        final resizedBytes = Uint8List.fromList(img.encodeJpg(resizedImage));
+
+        // Update the state with the compressed image
+        setState(() {
+          _image = File(pickedImage.path);
+          _base64Image = base64Encode(resizedBytes);
+          imageBytes = resizedBytes; // Display the compressed image
+          error = ''; // Clear any previous errors
+        });
+      }
+    } else {
+      setState(() {
+        error = "No image selected"; // If no image was picked
+      });
+    }
+  }
 
   Future uploadCitizenship() async {
     final XFile? pickedImage2 =
@@ -55,16 +81,10 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
         // Prepare user data for update
         Map<String, dynamic> updatedData = {
           'fullName': _nameController.text,
-          'email': _emailController.text,
-          'password': _passwordController.text,
           'phoneNumber': _phoneController.text,
           'gender': _selectedGender,
+          'image': _base64Image
         };
-
-        // Include the base64 image if it's set
-        if (_base64Image.isNotEmpty) {
-          updatedData['imageUrl'] = _base64Image;
-        }
 
         // Update the user document in Firestore
         await FirebaseFirestore.instance
@@ -104,11 +124,10 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
           // Populate the controllers with the fetched data
           setState(() {
             _nameController.text = userData['fullName'] ?? '';
-            _emailController.text = userData['email'] ?? '';
-            _passwordController.text = userData['password'] ?? '';
+
             _phoneController.text = userData['phoneNumber'] ?? '';
             _selectedGender = userData['gender'] ?? 'Male';
-            final base64Image = userData['imageUrl'] ?? '';
+            final base64Image = userData['image'] ?? '';
 
             if (base64Image.isNotEmpty) {
               try {
@@ -156,10 +175,12 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
             Stack(
               alignment: Alignment.bottomRight,
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 50,
-                  backgroundImage:
-                      AssetImage('assets/email.png'), // Replace with your asset
+                  backgroundImage: imageBytes != null
+                      ? MemoryImage(imageBytes!) // Display decoded image
+                      : const AssetImage('assets/userprofile.jpg')
+                          as ImageProvider, // Replace with your asset
                 ),
                 CircleAvatar(
                   radius: 16,
@@ -167,8 +188,8 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
                   child: IconButton(
                     icon: const Icon(Icons.camera_alt,
                         color: Colors.white, size: 16),
-                    onPressed: () {
-                      // Handle profile picture change
+                    onPressed: () async {
+                      await uploadimage();
                     },
                   ),
                 ),
@@ -187,26 +208,26 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
             const SizedBox(height: 16),
 
             // Email field
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // TextField(
+            //   controller: _emailController,
+            //   keyboardType: TextInputType.emailAddress,
+            //   decoration: const InputDecoration(
+            //     labelText: "Email",
+            //     border: OutlineInputBorder(),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
             // Password field
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // TextField(
+            //   controller: _passwordController,
+            //   obscureText: true,
+            //   decoration: const InputDecoration(
+            //     labelText: "Password",
+            //     border: OutlineInputBorder(),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
             // Phone number field
             TextField(
@@ -245,7 +266,7 @@ class _EditAdminProfileState extends State<EditAdminProfile> {
               child: ElevatedButton(
                 onPressed: () {
                   updateUserProfile();
-                  Navigator.pushNamed(context, '/space_owner');
+                  Navigator.pushNamed(context, '/admin');
                 },
                 style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

@@ -47,11 +47,10 @@ class _LoginPageState extends State<LoginPage> {
       // Call the login function from AuthService
       await authService.loginUser(
         context: context,
-        email: _emailController.text,
-        password: _passwordController.text,
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
     } catch (e) {
-      // print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login failed: ${e.toString()}")),
       );

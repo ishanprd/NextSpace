@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -52,18 +55,20 @@ class _ViewUsersState extends State<ViewUsers>
         coWorkers = coWorkersSnapshot.docs.map((doc) {
           return {
             'userName': doc['fullName'],
-            'userPhoto':
-                doc['imageUrl'] ?? 'assets/userprofile.jpg', // Default image
+            'userPhoto': doc['image'] ?? 'assets/userprofile.jpg',
             'role': doc['role'],
+            'email': doc['email'] ?? 'N/A',
+            'phone': doc['phoneNumber'] ?? 'N/A',
           };
         }).toList();
 
         spaceOwners = spaceOwnersSnapshot.docs.map((doc) {
           return {
             'userName': doc['fullName'],
-            'userPhoto':
-                doc['imageUrl'] ?? 'assets/userprofile.jpg', // Default image
+            'userPhoto': doc['image'] ?? 'assets/userprofile.jpg',
             'role': doc['role'],
+            'email': doc['email'] ?? 'N/A',
+            'phone': doc['phoneNumber'] ?? 'N/A',
           };
         }).toList();
 
@@ -126,19 +131,43 @@ class _ViewUsersState extends State<ViewUsers>
           : ListView.builder(
               itemCount: userList.length,
               itemBuilder: (context, index) {
+                final user = userList[index];
+                final base64Image = user['userPhoto'];
+
+                Uint8List? imageBytes;
+
+                if (base64Image.isNotEmpty) {
+                  try {
+                    imageBytes =
+                        base64Decode(base64Image); // Decode base64 image data
+                  } catch (e) {
+                    print('Error decoding base64: $e');
+                    imageBytes = null; // Handle decoding error
+                  }
+                }
+
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(userList[index]["userPhoto"]),
+                      backgroundImage: imageBytes != null
+                          ? MemoryImage(imageBytes) // Display decoded image
+                          : const AssetImage('assets/userprofile.jpg')
+                              as ImageProvider,
                       radius: 25,
                     ),
                     title: Text(
-                      userList[index]["userName"],
+                      user["userName"],
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("Role: ${userList[index]['role']}"),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Role: ${user['role']}"),
+                        Text("Email: ${user['email']}"),
+                        Text("Phone: ${user['phone']}"),
+                      ],
+                    ),
                   ),
                 );
               },

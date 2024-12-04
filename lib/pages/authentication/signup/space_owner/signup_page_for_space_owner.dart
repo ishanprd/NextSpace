@@ -27,7 +27,8 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
 
   String? _selectedGender = "Male"; // Move this outside the build method
 
-  File? _image;
+  File? _image1;
+  File? _image2;
   final picker = ImagePicker();
   String error = '';
   String? email;
@@ -36,7 +37,21 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
-        _image = File(pickedImage.path);
+        _image1 = File(pickedImage.path);
+        error = ''; // Clear previous error if image is selected
+      });
+    } else {
+      setState(() {
+        error = "No image selected";
+      });
+    }
+  }
+
+  Future uploadimage() async {
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      setState(() {
+        _image2 = File(pickedImage.path);
         error = ''; // Clear previous error if image is selected
       });
     } else {
@@ -76,9 +91,15 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
       return;
     }
 
-    if (_image == null) {
+    if (_image1 == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please upload your citizenship image")),
+      );
+      return;
+    }
+    if (_image2 == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please upload your  image")),
       );
       return;
     }
@@ -92,7 +113,8 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
         fullName: _fullNameController.text,
         phoneNumber: _phoneController.text,
         gender: _selectedGender ?? 'Male',
-        imageUrl: _image!.path, // Upload image to Firebase Storage if needed
+        imageUrl: _image1!.path,
+        image: _image2!.path, // Upload image to Firebase Storage if needed
         role: 'space_owner', // Assuming role is coworker
       );
       Navigator.pushReplacementNamed(context, '/login');
@@ -307,7 +329,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  if (_image == null)
+                  if (_image1 == null)
                     Text(
                       error,
                       style: const TextStyle(
@@ -320,6 +342,60 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
                   else
                     const Text(
                       "Citizenship Uploaded successfully!",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: size.height * 0.03),
+              OutlinedButton.icon(
+                onPressed: uploadimage,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(
+                    color: Colors.blueAccent,
+                    width: 1.5,
+                    style: BorderStyle.solid,
+                  ),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                ),
+                icon: const Icon(
+                  Icons.add_a_photo_outlined,
+                  color: Colors.black,
+                ),
+                label: const Text(
+                  'Profile',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  if (_image2 == null)
+                    Text(
+                      error,
+                      style: const TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    )
+                  else
+                    const Text(
+                      "Profile Uploaded successfully!",
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontSize: 10,

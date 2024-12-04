@@ -38,7 +38,8 @@ dependencies:
   flutter_email_sender:
   charts_flutter:
   fl_chart:
-
+  collection:
+  image:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

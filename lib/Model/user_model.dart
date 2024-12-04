@@ -6,7 +6,7 @@ class UserModel {
   final String password;
   final String gender;
   final String imageUrl;
-  final String photo;
+  final Null photo;
   final String role;
 
   UserModel({
@@ -17,7 +17,7 @@ class UserModel {
     required this.password,
     required this.gender,
     required this.imageUrl,
-    required this.photo, // photo is optional in the JSON structure, so it's nullable
+    required this.photo,
     required this.role,
   });
 

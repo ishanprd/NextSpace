@@ -1,8 +1,62 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
+
+  @override
+  _AdminDashboardState createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<AdminDashboard> {
+  // Variables to store fetched data
+  int usersCount = 0;
+  int bookedCount = 0;
+  int feedbackCount = 0;
+  int revenueCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOverviewData(); // Fetch data when widget is initialized
+  }
+
+  // Fetch data from Firestore
+  Future<void> _fetchOverviewData() async {
+    try {
+      // Fetch user count
+      QuerySnapshot userSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      setState(() {
+        usersCount = userSnapshot.docs.length;
+      });
+
+      // Fetch booked count (replace with actual collection)
+      QuerySnapshot bookedSnapshot =
+          await FirebaseFirestore.instance.collection('bookings').get();
+      setState(() {
+        bookedCount = bookedSnapshot.docs.length;
+      });
+
+      // Fetch feedback count (replace with actual collection)
+      QuerySnapshot feedbackSnapshot =
+          await FirebaseFirestore.instance.collection('feedback').get();
+      setState(() {
+        feedbackCount = feedbackSnapshot.docs.length;
+      });
+
+      // Fetch revenue (this could be from a 'revenue' collection or calculated differently)
+      QuerySnapshot revenueSnapshot =
+          await FirebaseFirestore.instance.collection('transactions').get();
+      setState(() {
+        revenueCount = revenueSnapshot.docs.fold<int>(
+            0, (previousValue, doc) => previousValue + (doc['amount'] as int));
+      });
+    } catch (e) {
+      print("Error fetching overview data: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +88,14 @@ class AdminDashboard extends StatelessWidget {
                 children: [
                   _buildStatCard(
                     title: "Users",
-                    value: "12k",
-                    increment: "100↑",
+                    value: "$usersCount",
+                    increment: "100↑", // You can update this to dynamic data
                     color: Colors.purple,
                   ),
                   const SizedBox(width: 10),
                   _buildStatCard(
                     title: "Booked",
-                    value: "50k",
+                    value: "$bookedCount",
                     increment: "10k↑",
                     color: Colors.blue,
                   ),
@@ -52,14 +106,14 @@ class AdminDashboard extends StatelessWidget {
                 children: [
                   _buildStatCard(
                     title: "Feedback",
-                    value: "10",
+                    value: "$feedbackCount",
                     increment: "5↓",
                     color: Colors.red,
                   ),
                   const SizedBox(width: 10),
                   _buildStatCard(
                     title: "Revenue",
-                    value: "108k",
+                    value: "\$$revenueCount", // Dynamically display revenue
                     increment: "50k↑",
                     color: Colors.pink,
                   ),
@@ -135,7 +189,7 @@ class AdminDashboard extends StatelessWidget {
   }
 
   Widget _buildTransactionList() {
-    // Sample dynamic data
+    // Sample dynamic data (you can replace this with actual data)
     List<Map<String, String>> transactions = [
       {
         "name": "Product Design Handbook",
@@ -205,6 +259,32 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 
+class _ProductTile extends StatelessWidget {
+  final String name;
+  final String price;
+  final String purchases;
+  final Color color;
+
+  const _ProductTile({
+    required this.name,
+    required this.price,
+    required this.purchases,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: color.withOpacity(0.2),
+        child: Icon(Icons.shopping_bag, color: color),
+      ),
+      title: Text(name),
+      subtitle: Text("$price · $purchases"),
+    );
+  }
+}
+
 class PieChartWidget extends StatelessWidget {
   const PieChartWidget({super.key});
 
@@ -249,32 +329,6 @@ class PieChartWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ProductTile extends StatelessWidget {
-  final String name;
-  final String price;
-  final String purchases;
-  final Color color;
-
-  const _ProductTile({
-    required this.name,
-    required this.price,
-    required this.purchases,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.2),
-        child: Icon(Icons.shopping_bag, color: color),
-      ),
-      title: Text(name),
-      subtitle: Text("$price · $purchases"),
     );
   }
 }

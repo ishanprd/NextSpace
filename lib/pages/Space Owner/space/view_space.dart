@@ -252,7 +252,7 @@ class _ViewSpaceState extends State<ViewSpace> {
                 const SizedBox(height: 24),
                 _spaceLocation == null
                     ? const Center(child: CircularProgressIndicator())
-                    : Container(
+                    : SizedBox(
                         height: 300,
                         width: double.infinity,
                         child: GoogleMap(
@@ -262,7 +262,7 @@ class _ViewSpaceState extends State<ViewSpace> {
                           ),
                           markers: {
                             Marker(
-                              markerId: MarkerId('spaceLocation'),
+                              markerId: const MarkerId('spaceLocation'),
                               position: _spaceLocation!,
                             ),
                           },

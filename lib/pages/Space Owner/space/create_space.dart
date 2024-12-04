@@ -33,7 +33,8 @@ class _CreateSpaceState extends State<CreateSpace> {
   final TextEditingController _spaceController = TextEditingController();
 
   // Default location for map picker
-  final LatLng _defaultLocation = LatLng(27.7172, 85.3240); // Kathmandu, Nepal
+  final LatLng _defaultLocation =
+      const LatLng(27.7172, 85.3240); // Kathmandu, Nepal
 
   final List<String> _selectedAmenities = [];
   final List<String> _allAmenities = [
@@ -214,7 +215,7 @@ class _CreateSpaceState extends State<CreateSpace> {
                 decoration: const InputDecoration(
                   labelText: "Monthly Price",
                   border: OutlineInputBorder(),
-                  prefixText: "\Rs.",
+                  prefixText: "Rs.",
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {

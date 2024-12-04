@@ -41,7 +41,8 @@ class _EditSpaceState extends State<EditSpace> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
 
-  final LatLng _defaultLocation = LatLng(27.7172, 85.3240); // Kathmandu, Nepal
+  final LatLng _defaultLocation =
+      const LatLng(27.7172, 85.3240); // Kathmandu, Nepal
 
   final List<String> _selectedAmenities = [];
   final List<String> _allAmenities = [
@@ -338,7 +339,7 @@ class _EditSpaceState extends State<EditSpace> {
                       decoration: const InputDecoration(
                         labelText: "Monthly Price",
                         border: OutlineInputBorder(),
-                        prefixText: "\Rs.",
+                        prefixText: "Rs.",
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {

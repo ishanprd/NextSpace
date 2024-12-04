@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:nextspace/pages/Space%20Owner/booking.dart';
+import 'package:nextspace/pages/Space%20Owner/space/view_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space_message.dart';
 import 'package:nextspace/pages/Space%20Owner/space_owner_dashboard.dart';
 import 'package:nextspace/pages/Space%20Owner/space_page.dart';
 import 'package:nextspace/pages/Space%20Owner/space_setting.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // To check the user status
+import 'package:cloud_firestore/cloud_firestore.dart'; // To access Firestore and check if the space is created
 
 class SpaceOwnerNavigation extends StatefulWidget {
   const SpaceOwnerNavigation({super.key});
@@ -16,24 +19,90 @@ class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
   int myIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
 
+  bool isSpaceCreated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfSpaceCreated();
+  }
+
+  void _checkIfSpaceCreated() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Query spaces collection for a document where ownerId equals current user's UID
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('spaces')
+          .where('ownerId', isEqualTo: user.uid) // Search by ownerId field
+          .get();
+
+      // Check if any document exists with the given ownerId
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          isSpaceCreated = true;
+        });
+      } else {
+        setState(() {
+          isSpaceCreated = false;
+        });
+      }
+    }
+  }
+
   final List<Widget> screenList = [
     const SpaceOwnerDashboard(),
-    const SpacePage(),
+    const ViewSpace(), // This will be conditionally rendered
     const Booking(),
     const SpaceMessage(),
     const SpaceSetting(),
   ];
 
   void onTabTapped(int index) {
-    setState(() {
-      myIndex = index;
-    });
-    // Animate to the new page
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300), // Animation duration
-      curve: Curves.easeInOut, // Animation curve
-    );
+    if (index == 1 && !isSpaceCreated) {
+      // If user tries to open the 'My Space' page but space is not created, show a different page or alert
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Space Not Created"),
+            content: const Text(
+                "Please create your space first before accessing this page."),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("Create Space"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Navigate to the space creation page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SpacePage()),
+                  ).then((_) {
+                    // Once coming back, check if the space is created
+                    _checkIfSpaceCreated();
+                  });
+                },
+              ),
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      setState(() {
+        myIndex = index;
+      });
+      // Animate to the new page
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300), // Animation duration
+        curve: Curves.easeInOut, // Animation curve
+      );
+    }
   }
 
   @override

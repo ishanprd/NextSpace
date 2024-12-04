@@ -1,5 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Importing the image picker package
+import 'package:image_picker/image_picker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:nextspace/Model/space_model.dart';
+import 'map_screen.dart'; // Ensure to have this file for the MapScreen implementation
 
 class CreateSpace extends StatefulWidget {
   const CreateSpace({super.key});
@@ -13,9 +20,20 @@ class _CreateSpaceState extends State<CreateSpace> {
   String? _spaceName;
   String? _description;
   String? _monthlyPrice;
-  String? _place;
   String? _city;
   String? _imagePath;
+  String? _location;
+  File? _image;
+
+  String _base64Image = "";
+
+  String ownerId = FirebaseAuth.instance.currentUser?.uid ?? "default_owner_id";
+
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _spaceController = TextEditingController();
+
+  // Default location for map picker
+  final LatLng _defaultLocation = LatLng(27.7172, 85.3240); // Kathmandu, Nepal
 
   final List<String> _selectedAmenities = [];
   final List<String> _allAmenities = [
@@ -26,25 +44,24 @@ class _CreateSpaceState extends State<CreateSpace> {
     'Event Space',
     'Elevator',
   ];
-
-  // Function to handle form submission
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      // Handle space creation logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Space created successfully!")),
-      );
-    }
-  }
+  final List<String> _roomType = []; // Variable to hold selected room type
+  final List<String> _roomTypes = [
+    'Private Office',
+    'Meeting Room',
+    'Event Space',
+    'Hot Desk',
+  ];
 
   // Function to pick an image
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+    final XFile? pickedImage2 =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage2 != null) {
+      final bytes = await pickedImage2.readAsBytes();
       setState(() {
-        _imagePath = pickedFile.path; // Get the image file path
+        _image = File(pickedImage2.path);
+        _base64Image = base64Encode(bytes); // Get the image file path
       });
     }
   }
@@ -60,9 +77,86 @@ class _CreateSpaceState extends State<CreateSpace> {
     });
   }
 
+  void _onTypeSelected(bool? selected, String amenity) {
+    setState(() {
+      if (selected == true) {
+        _roomType.add(amenity);
+      } else {
+        _roomType.remove(amenity);
+      }
+    });
+  }
+
+  // Function to pick location from map
+  void _pickLocation() async {
+    final LatLng? selectedLocation = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => MapScreen(initialLocation: _defaultLocation),
+      ),
+    );
+
+    if (selectedLocation != null) {
+      setState(() {
+        _location =
+            "${selectedLocation.latitude}, ${selectedLocation.longitude}";
+      });
+    }
+  }
+
+  void _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      try {
+        // Create the Space object
+        Space space = Space(
+          spaceName:
+              _spaceController.text.trim(), // Provide default value if null
+          description: _descriptionController.text.trim(), // Default if null
+          monthlyPrice: _monthlyPrice ?? "0", // Default price if null
+          city: _city ?? "Unknown City", // Default city if null
+          location: _location ?? "0.0, 0.0", // Default location if null
+          imagePath: _base64Image, // This can remain null if not selected
+          selectedAmenities: _selectedAmenities,
+          roomType: _roomType,
+          ownerId: ownerId,
+          status: 'request', // Replace with actual owner ID
+          createdAt: Timestamp.fromDate(DateTime.now()),
+        );
+
+        // Create a reference to Firestore
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+        // Save the space data to Firestore
+        await firestore.collection('spaces').add(space.toMap());
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Space registered successfully!")),
+        );
+        Navigator.pushNamed(context, '/space_owner');
+
+        // Optionally, reset the form after submission
+        _formKey.currentState!.reset();
+        setState(() {
+          _imagePath = null;
+          _location = null;
+          _selectedAmenities.clear();
+          _roomType.clear();
+        });
+      } catch (e) {
+        // Handle errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to register space: $e")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           "Create Space",
@@ -78,6 +172,7 @@ class _CreateSpaceState extends State<CreateSpace> {
             children: [
               // Space Name Field
               TextFormField(
+                controller: _spaceController,
                 decoration: const InputDecoration(
                   labelText: "Space Name",
                   border: OutlineInputBorder(),
@@ -89,13 +184,14 @@ class _CreateSpaceState extends State<CreateSpace> {
                   return null;
                 },
                 onSaved: (value) {
-                  _spaceName = value;
+                  _spaceName = _spaceController.text;
                 },
               ),
               const SizedBox(height: 20),
 
               // Description Field
               TextFormField(
+                controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: "Description",
                   border: OutlineInputBorder(),
@@ -108,7 +204,7 @@ class _CreateSpaceState extends State<CreateSpace> {
                   return null;
                 },
                 onSaved: (value) {
-                  _description = value;
+                  _description = _descriptionController.text;
                 },
               ),
               const SizedBox(height: 20),
@@ -118,7 +214,7 @@ class _CreateSpaceState extends State<CreateSpace> {
                 decoration: const InputDecoration(
                   labelText: "Monthly Price",
                   border: OutlineInputBorder(),
-                  prefixText: "\$",
+                  prefixText: "\Rs.",
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -133,41 +229,6 @@ class _CreateSpaceState extends State<CreateSpace> {
               ),
               const SizedBox(height: 20),
 
-              // Place Field
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: "Place",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter the place";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _place = value;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // City Field
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: "Open hour",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter the city";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _city = value;
-                },
-              ),
-              const SizedBox(height: 20),
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: "City",
@@ -181,6 +242,27 @@ class _CreateSpaceState extends State<CreateSpace> {
                 },
                 onSaved: (value) {
                   _city = value;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Location Field
+              TextFormField(
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: "Location",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.map),
+                    onPressed: _pickLocation,
+                  ),
+                ),
+                controller: TextEditingController(text: _location),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select a location";
+                  }
+                  return null;
                 },
               ),
               const SizedBox(height: 20),
@@ -202,35 +284,85 @@ class _CreateSpaceState extends State<CreateSpace> {
                 }).toList(),
               ),
               const SizedBox(height: 20),
+              const Text(
+                "Room Types",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Column(
+                children: _roomTypes.map((amenity) {
+                  return CheckboxListTile(
+                    title: Text(amenity),
+                    value: _roomType.contains(amenity),
+                    onChanged: (bool? selected) {
+                      _onTypeSelected(selected, amenity);
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
 
               // Image Picker
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: _pickImage,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                    ),
-                    child: const Text(
-                      "Pick Image",
-                      style: TextStyle(color: Colors.white),
-                    ),
+              OutlinedButton.icon(
+                onPressed:
+                    _pickImage, // Use the existing _pickImage function for selecting an image
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(
+                    color: Colors.blueAccent,
+                    width: 1.5,
+                    style: BorderStyle.solid,
                   ),
-                  const SizedBox(width: 10),
-                  if (_imagePath != null)
-                    Text(
-                      "Image selected",
-                      style: TextStyle(color: Colors.green.shade600),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                ),
+                icon: const Icon(
+                  Icons.add_a_photo_outlined,
+                  color: Colors.black,
+                ),
+                label: const Text(
+                  'Image',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  if (_base64Image.isEmpty) // Check if an image is not selected
+                    const Text(
+                      "Please upload your Space image",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    )
+                  else
+                    const Text(
+                      "Space image uploaded successfully!",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueAccent,
+                      ),
                     ),
                 ],
               ),
+
               const SizedBox(height: 20),
 
               // Submit Button
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/view_space');
-                },
+                onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.blueAccent,

@@ -4,10 +4,12 @@ import 'package:nextspace/navigation/admin_navigation.dart';
 import 'package:nextspace/pages/Space%20Owner/chat/conversation.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space/create_space.dart';
+import 'package:nextspace/pages/Space%20Owner/space/edit_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space/view_space.dart';
 import 'package:nextspace/pages/admin/setting/edit_admin_profile.dart';
 import 'package:nextspace/pages/admin/setting/issues_problems.dart';
 import 'package:nextspace/pages/admin/setting/notification.dart';
+import 'package:nextspace/pages/Space%20Owner/space_page.dart';
 import 'firebase_options.dart';
 import 'package:nextspace/pages/start_page.dart';
 import 'package:nextspace/pages/authentication/reset/reset_password.dart';
@@ -74,6 +76,8 @@ class NextSpace extends StatelessWidget {
         '/edit_admin_profile': (context) => const EditAdminProfile(),
         '/issues': (context) => const IssuesProblems(),
         '/admin_notifications': (context) => const AdminNotification(),
+        '/space_page': (context) => const SpacePage(),
+        '/edit_space': (context) => const EditSpace(),
       },
     );
   }

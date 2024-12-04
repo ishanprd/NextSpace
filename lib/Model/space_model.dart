@@ -10,6 +10,7 @@ class Space {
   List<String> selectedAmenities;
   List<String> roomType;
   String ownerId;
+  String status;
   Timestamp createdAt;
 
   Space({
@@ -22,6 +23,7 @@ class Space {
     required this.selectedAmenities,
     required this.roomType,
     required this.ownerId,
+    required this.status,
     required this.createdAt,
   });
 
@@ -37,6 +39,7 @@ class Space {
       'selectedAmenities': selectedAmenities,
       'roomType': roomType,
       'ownerId': ownerId,
+      'status': status,
       'createdAt': createdAt,
     };
   }
@@ -55,6 +58,7 @@ class Space {
       selectedAmenities: List<String>.from(data['selectedAmenities']),
       roomType: List<String>.from(data['roomType']),
       ownerId: data['ownerId'],
+      status: data['status'],
       createdAt: data['createdAt'],
     );
   }

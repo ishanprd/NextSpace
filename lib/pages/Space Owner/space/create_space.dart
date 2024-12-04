@@ -119,7 +119,8 @@ class _CreateSpaceState extends State<CreateSpace> {
           imagePath: _base64Image, // This can remain null if not selected
           selectedAmenities: _selectedAmenities,
           roomType: _roomType,
-          ownerId: ownerId, // Replace with actual owner ID
+          ownerId: ownerId,
+          status: 'request', // Replace with actual owner ID
           createdAt: Timestamp.fromDate(DateTime.now()),
         );
 

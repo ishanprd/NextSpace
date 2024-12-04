@@ -142,6 +142,7 @@ class _ViewSpaceState extends State<ViewSpace> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 50),
                 if (imageBytes != null)
                   SizedBox(
                     width: double

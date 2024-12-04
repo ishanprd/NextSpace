@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'map_screen.dart'; // Ensure to have this file for the MapScreen implementation
+import 'map_screen.dart';
+import 'package:image/image.dart' as img;
+
+// Ensure to have this file for the MapScreen implementation
 
 class EditSpace extends StatefulWidget {
   const EditSpace({super.key});
@@ -23,6 +27,8 @@ class _EditSpaceState extends State<EditSpace> {
   String? _imagePath;
   String? _location;
   File? _image;
+  Uint8List? imageBytes;
+  final picker = ImagePicker();
 
   bool _isLoading = true;
   String space_id = "";
@@ -124,7 +130,7 @@ class _EditSpaceState extends State<EditSpace> {
       );
 
       // Navigate back to the previous screen or update the UI as needed
-      Navigator.pushNamed(context, '/view_space');
+      Navigator.pop(context);
     } catch (error) {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,15 +145,27 @@ class _EditSpaceState extends State<EditSpace> {
     _fetchSpaceData(); // Fetch space data on initialization
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> uploadimage() async {
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      final bytes = await pickedImage.readAsBytes();
+      final image = img.decodeImage(Uint8List.fromList(bytes));
+      if (image != null) {
+        // Resize image (example: 800px wide, maintaining aspect ratio)
+        final resizedImage = img.copyResize(image, width: 800);
 
-    if (pickedFile != null) {
-      _image = File(pickedFile.path);
-      // Convert the image to base64 string
-      List<int> imageBytes = await _image!.readAsBytes();
-      _base64Image = base64Encode(imageBytes);
+        // Convert resized image to bytes
+        final resizedBytes = Uint8List.fromList(img.encodeJpg(resizedImage));
+
+        // Update the state with the compressed image
+        setState(() {
+          _image = File(pickedImage.path);
+          _base64Image = base64Encode(resizedBytes);
+          imageBytes = resizedBytes; // Display the compressed image
+        });
+      }
+    } else {
       setState(() {});
     }
   }
@@ -219,6 +237,8 @@ class _EditSpaceState extends State<EditSpace> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Space data updated successfully")),
           );
+          await _fetchSpaceData();
+          Navigator.pop(context);
 
           // Navigate back after saving
         } else {
@@ -403,7 +423,7 @@ class _EditSpaceState extends State<EditSpace> {
                     ),
                     const SizedBox(height: 20),
                     OutlinedButton.icon(
-                      onPressed: _pickImage,
+                      onPressed: uploadimage,
                       icon: const Icon(Icons.add_a_photo_outlined,
                           color: Colors.black),
                       label: const Text('Image'),
@@ -454,7 +474,6 @@ class _EditSpaceState extends State<EditSpace> {
                     ElevatedButton(
                       onPressed: () {
                         _submitForm();
-                        Navigator.pushNamed(context, '/view_space');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -24,8 +25,14 @@ class _EditProfileState extends State<EditProfile> {
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
 
   Uint8List? imageBytes;
+  Uint8List? imageBytes2;
+
   String _base64Image = "";
+  String _base64Image2 = "";
+
   File? _image;
+  File? _image2;
+
   final picker = ImagePicker();
   String error = '';
   String? email;
@@ -36,13 +43,41 @@ class _EditProfileState extends State<EditProfile> {
     if (pickedImage2 != null) {
       final bytes = await pickedImage2.readAsBytes();
       setState(() {
-        _image = File(pickedImage2.path);
-        _base64Image = base64Encode(bytes);
+        _image2 = File(pickedImage2.path);
+        _base64Image2 = base64Encode(bytes);
         error = ''; // Clear previous error if image is selected
       });
     } else {
       setState(() {
         error = "No image selected";
+      });
+    }
+  }
+
+  Future<void> uploadimage() async {
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      final bytes = await pickedImage.readAsBytes();
+      final image = img.decodeImage(Uint8List.fromList(bytes));
+      if (image != null) {
+        // Resize image (example: 800px wide, maintaining aspect ratio)
+        final resizedImage = img.copyResize(image, width: 800);
+
+        // Convert resized image to bytes
+        final resizedBytes = Uint8List.fromList(img.encodeJpg(resizedImage));
+
+        // Update the state with the compressed image
+        setState(() {
+          _image = File(pickedImage.path);
+          _base64Image = base64Encode(resizedBytes);
+          imageBytes = resizedBytes; // Display the compressed image
+          error = ''; // Clear any previous errors
+        });
+      }
+    } else {
+      setState(() {
+        error = "No image selected"; // If no image was picked
       });
     }
   }
@@ -61,9 +96,14 @@ class _EditProfileState extends State<EditProfile> {
           'gender': _selectedGender,
         };
 
-        // Include the base64 image if it's set
+        // Only add image and imageUrl if they are not empty
         if (_base64Image.isNotEmpty) {
-          updatedData['imageUrl'] = _base64Image;
+          updatedData['image'] = _base64Image; // Add image if it's not empty
+        }
+
+        if (_base64Image2.isNotEmpty) {
+          updatedData['imageUrl'] =
+              _base64Image2; // Add imageUrl if it's not empty
         }
 
         // Update the user document in Firestore
@@ -76,6 +116,8 @@ class _EditProfileState extends State<EditProfile> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),
         );
+        _fetchUserData();
+        Navigator.pop(context); // Fetch updated data after successful update
       } catch (e) {
         print("Error updating profile: $e");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +150,7 @@ class _EditProfileState extends State<EditProfile> {
             _passwordController.text = userData['password'] ?? '';
             _phoneController.text = userData['phoneNumber'] ?? '';
             _selectedGender = userData['gender'] ?? 'Male';
-            final base64Image = userData['imageUrl'] ?? '';
+            final base64Image = userData['image'] ?? '';
 
             if (base64Image.isNotEmpty) {
               try {
@@ -119,6 +161,17 @@ class _EditProfileState extends State<EditProfile> {
                 imageBytes = null; // Handle decoding error
               }
             } // Set gender
+            final base64Image2 = userData['imageUrl'] ?? '';
+
+            if (base64Image2.isNotEmpty) {
+              try {
+                imageBytes2 =
+                    base64Decode(base64Image2); // Decode base64 image data
+              } catch (e) {
+                print('Error decoding base64: $e');
+                imageBytes2 = null; // Handle decoding error
+              }
+            } //
           });
         } else {
           print("User not found!");
@@ -156,11 +209,13 @@ class _EditProfileState extends State<EditProfile> {
             Stack(
               alignment: Alignment.bottomRight,
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 50,
-                  backgroundImage:
-                      AssetImage('assets/email.png'), // Replace with your asset
-                ),
+                  backgroundImage: imageBytes != null
+                      ? MemoryImage(imageBytes!) // Display decoded image
+                      : const AssetImage('assets/userprofile.jpg')
+                          as ImageProvider, // Replace with your asset
+                ), // Replace with your asset
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: Colors.blue,
@@ -168,7 +223,7 @@ class _EditProfileState extends State<EditProfile> {
                     icon: const Icon(Icons.camera_alt,
                         color: Colors.white, size: 16),
                     onPressed: () {
-                      // Handle profile picture change
+                      uploadimage();
                     },
                   ),
                 ),
@@ -187,26 +242,26 @@ class _EditProfileState extends State<EditProfile> {
             const SizedBox(height: 16),
 
             // Email field
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // TextField(
+            //   controller: _emailController,
+            //   keyboardType: TextInputType.emailAddress,
+            //   decoration: const InputDecoration(
+            //     labelText: "Email",
+            //     border: OutlineInputBorder(),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
-            // Password field
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // // Password field
+            // TextField(
+            //   controller: _passwordController,
+            //   obscureText: true,
+            //   decoration: const InputDecoration(
+            //     labelText: "Password",
+            //     border: OutlineInputBorder(),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
             // Phone number field
             TextField(
@@ -239,14 +294,14 @@ class _EditProfileState extends State<EditProfile> {
             ),
             const SizedBox(height: 24),
 
-            if (imageBytes != null)
+            if (imageBytes2 != null)
               SizedBox(
                 width: double
                     .infinity, // Set width to occupy the full available space
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
                   child: Image.memory(
-                    imageBytes!,
+                    imageBytes2!,
                     fit: BoxFit
                         .cover, // You can change the BoxFit to control how the image fits
                   ), // Display image using Image.memory
@@ -284,7 +339,7 @@ class _EditProfileState extends State<EditProfile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                if (_base64Image.isEmpty)
+                if (_base64Image2.isEmpty)
                   Text(
                     error,
                     style: const TextStyle(
@@ -313,7 +368,6 @@ class _EditProfileState extends State<EditProfile> {
               child: ElevatedButton(
                 onPressed: () {
                   updateUserProfile();
-                  Navigator.pushNamed(context, '/space_owner');
                 },
                 style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

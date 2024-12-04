@@ -6,6 +6,7 @@ class UserModel {
   final String password;
   final String gender;
   final String imageUrl;
+  final String photo;
   final String role;
 
   UserModel({
@@ -16,6 +17,7 @@ class UserModel {
     required this.password,
     required this.gender,
     required this.imageUrl,
+    required this.photo, // photo is optional in the JSON structure, so it's nullable
     required this.role,
   });
 
@@ -28,6 +30,7 @@ class UserModel {
       'password': password,
       'gender': gender,
       'imageUrl': imageUrl,
+      'photo': photo, // photo is optional in the JSON structure, so it's
       'role': role,
     };
   }
@@ -41,6 +44,7 @@ class UserModel {
       password: json['password'],
       gender: json['gender'],
       imageUrl: json['imageUrl'],
+      photo: json['photo'], // photo is optional in the JSON structure, so it's
       role: json['role'],
     );
   }

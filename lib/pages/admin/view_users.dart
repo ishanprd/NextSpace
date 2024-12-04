@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ViewUsers extends StatefulWidget {
   const ViewUsers({super.key});
@@ -11,43 +12,69 @@ class _ViewUsersState extends State<ViewUsers>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Sample lists for different roles
-  List<Map<String, dynamic>> coWorkers = [
-    {
-      "userName": "John Doe",
-      "userPhoto": "assets/userprofile.jpg",
-      "role": "Co-worker",
-    },
-    {
-      "userName": "Jane Smith",
-      "userPhoto": "assets/userprofile2.jpg",
-      "role": "Co-worker",
-    },
-  ];
+  // Lists to store users based on roles
+  List<Map<String, dynamic>> coWorkers = [];
+  List<Map<String, dynamic>> spaceOwners = [];
 
-  List<Map<String, dynamic>> spaceOwners = [
-    {
-      "userName": "Alice Johnson",
-      "userPhoto": "assets/userprofile3.jpg",
-      "role": "Space Owner",
-    },
-    {
-      "userName": "Bob Williams",
-      "userPhoto": "assets/userprofile4.jpg",
-      "role": "Space Owner",
-    },
-  ];
+  // Loading state
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this); // Two tabs
+    _fetchUsers(); // Fetch users from Firestore
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  // Fetch users from Firestore based on their role
+  Future<void> _fetchUsers() async {
+    try {
+      // Fetch users from Firestore where role is 'Co-worker'
+      QuerySnapshot coWorkersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'coworker')
+          .get();
+
+      // Fetch users from Firestore where role is 'Space Owner'
+      QuerySnapshot spaceOwnersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'space_owner')
+          .get();
+
+      // Populate the lists based on the query results
+      setState(() {
+        coWorkers = coWorkersSnapshot.docs.map((doc) {
+          return {
+            'userName': doc['fullName'],
+            'userPhoto':
+                doc['imageUrl'] ?? 'assets/userprofile.jpg', // Default image
+            'role': doc['role'],
+          };
+        }).toList();
+
+        spaceOwners = spaceOwnersSnapshot.docs.map((doc) {
+          return {
+            'userName': doc['fullName'],
+            'userPhoto':
+                doc['imageUrl'] ?? 'assets/userprofile.jpg', // Default image
+            'role': doc['role'],
+          };
+        }).toList();
+
+        isLoading = false; // Set loading to false when data is fetched
+      });
+    } catch (e) {
+      print("Error fetching users: $e");
+      setState(() {
+        isLoading = false; // Set loading to false even if there's an error
+      });
+    }
   }
 
   @override
@@ -70,15 +97,18 @@ class _ViewUsersState extends State<ViewUsers>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Co-workers Tab
-          _buildUserList(coWorkers),
-          // Space Owners Tab
-          _buildUserList(spaceOwners),
-        ],
-      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator()) // Show loading spinner
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                // Co-workers Tab
+                _buildUserList(coWorkers),
+                // Space Owners Tab
+                _buildUserList(spaceOwners),
+              ],
+            ),
     );
   }
 
@@ -100,7 +130,8 @@ class _ViewUsersState extends State<ViewUsers>
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: AssetImage(userList[index]["userPhoto"]),
+                      backgroundImage:
+                          NetworkImage(userList[index]["userPhoto"]),
                       radius: 25,
                     ),
                     title: Text(

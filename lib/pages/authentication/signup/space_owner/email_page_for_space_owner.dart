@@ -106,7 +106,7 @@ class _EmailPageSpaceOwnerState extends State<EmailPageSpaceOwner> {
                   } else if (!exist) {
                     Navigator.pushNamed(
                       context,
-                      '/coworker_signup',
+                      '/spaceowner_signup',
                       arguments: email, // Passing email to the next page
                     );
                   }

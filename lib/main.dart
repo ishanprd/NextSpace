@@ -1,11 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nextspace/navigation/admin_navigation.dart';
+import 'package:nextspace/pages/Co-worker/book/add_detail.dart';
+import 'package:nextspace/pages/Co-worker/book/payment.dart';
 import 'package:nextspace/pages/Space%20Owner/chat/conversation.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space/create_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space/edit_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space/view_space.dart';
+import 'package:nextspace/pages/Co-worker/book/view_space_for_book.dart';
 import 'package:nextspace/pages/admin/setting/edit_admin_profile.dart';
 import 'package:nextspace/pages/admin/setting/issues_problems.dart';
 import 'package:nextspace/pages/admin/setting/notification.dart';
@@ -78,6 +81,9 @@ class NextSpace extends StatelessWidget {
         '/admin_notifications': (context) => const AdminNotification(),
         '/space_page': (context) => const SpacePage(),
         '/edit_space': (context) => const EditSpace(),
+        '/view_space_for_book': (context) => const ViewSpaceForBook(),
+        '/add_details': (context) => const AddDetail(),
+        '/payments': (context) => const PaymentPage(),
       },
     );
   }

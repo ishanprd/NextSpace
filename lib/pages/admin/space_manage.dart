@@ -47,7 +47,7 @@ class _SpaceManageState extends State<SpaceManage>
         return {
           'id': doc.id,
           'spaceName': doc['spaceName'],
-          'monthlyPrice': doc['monthlyPrice'],
+          'monthlyPrice': doc['hoursPrice'],
           'status': doc['status'],
           'ownerId': doc['ownerId'],
         };

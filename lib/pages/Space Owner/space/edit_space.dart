@@ -89,7 +89,7 @@ class _EditSpaceState extends State<EditSpace> {
         setState(() {
           _spaceController.text = data['spaceName'] ?? '';
           _descriptionController.text = data['description'] ?? '';
-          _priceController.text = data['monthlyPrice'] ?? '';
+          _priceController.text = data['hoursPrice'] ?? '';
           _cityController.text = data['city'] ?? '';
           _location = data['location'] ?? '';
           _base64Image = data['imagePath'] ?? '';
@@ -131,7 +131,7 @@ class _EditSpaceState extends State<EditSpace> {
       );
 
       // Navigate back to the previous screen or update the UI as needed
-      Navigator.pop(context);
+      Navigator.pushNamed(context, '/space_owner');
     } catch (error) {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
@@ -325,14 +325,14 @@ class _EditSpaceState extends State<EditSpace> {
                     TextFormField(
                       controller: _priceController,
                       decoration: const InputDecoration(
-                        labelText: "Monthly Price",
+                        labelText: "Hourly Price",
                         border: OutlineInputBorder(),
                         prefixText: "Rs.",
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "Please enter the monthly price";
+                          return "Please enter the Hours price";
                         }
                         return null;
                       },

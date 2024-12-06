@@ -122,7 +122,7 @@ class _ViewSpaceState extends State<ViewSpace> {
               space['description'] ?? 'No description available';
           List<String> amenities =
               List<String>.from(space['selectedAmenities'] ?? []);
-          String price = space['monthlyPrice'] ?? '0';
+          String price = space['hoursPrice'] ?? '0';
           String roomType = space['roomType'] ?? '';
 
           final base64Image = space['imagePath'] ?? '';

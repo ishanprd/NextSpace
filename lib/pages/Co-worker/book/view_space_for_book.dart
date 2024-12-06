@@ -1,18 +1,17 @@
 import 'dart:typed_data';
 import 'dart:convert'; // Needed for base64 decoding
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class ViewSpace extends StatefulWidget {
-  const ViewSpace({super.key});
+class ViewSpaceForBook extends StatefulWidget {
+  const ViewSpaceForBook({super.key});
 
   @override
-  State<ViewSpace> createState() => _ViewSpaceState();
+  State<ViewSpaceForBook> createState() => _ViewSpaceForBookState();
 }
 
-class _ViewSpaceState extends State<ViewSpace> {
+class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
   late Future<DocumentSnapshot> spaceData;
   LatLng? _spaceLocation; // To store the space's latitude and longitude
   late GoogleMapController mapController;
@@ -20,46 +19,50 @@ class _ViewSpaceState extends State<ViewSpace> {
   @override
   void initState() {
     super.initState();
-    _fetchSpaceData();
+    // Delay the code execution to ensure context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final spaceId = ModalRoute.of(context)?.settings.arguments as String?;
+      if (spaceId != null) {
+        _fetchSpaceData(spaceId);
+      } else {
+        // Handle the case where the spaceId is not passed
+        print('No spaceId provided');
+      }
+    });
   }
 
   // Fetch space data from Firebase Firestore
-  void _fetchSpaceData() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      spaceData = FirebaseFirestore.instance
-          .collection('spaces')
-          .where('ownerId', isEqualTo: user.uid) // Query space by ownerId
-          .limit(1)
-          .get()
-          .then((querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          var space = querySnapshot.docs.first;
-          // Extract location data (latitude and longitude) from the 'location' string
-          var location = space['location'];
+  void _fetchSpaceData(String spaceId) {
+    spaceData = FirebaseFirestore.instance
+        .collection('spaces')
+        .doc(spaceId)
+        .get()
+        .then((docSnapshot) {
+      if (docSnapshot.exists) {
+        var space = docSnapshot;
+        // Extract location data (latitude and longitude) from the 'location' string
+        var location = space['location'];
 
-          if (location != null) {
-            // Split the string by the comma to get latitude and longitude
-            List<String> locationParts = location.split(',');
-            if (locationParts.length == 2) {
-              double latitude = double.tryParse(locationParts[0]) ?? 0.0;
-              double longitude = double.tryParse(locationParts[1]) ?? 0.0;
-              setState(() {
-                _spaceLocation =
-                    LatLng(latitude, longitude); // Set the location
-              });
-            } else {
-              throw Exception('Invalid location format');
-            }
+        if (location != null) {
+          // Split the string by the comma to get latitude and longitude
+          List<String> locationParts = location.split(',');
+          if (locationParts.length == 2) {
+            double latitude = double.tryParse(locationParts[0]) ?? 0.0;
+            double longitude = double.tryParse(locationParts[1]) ?? 0.0;
+            setState(() {
+              _spaceLocation = LatLng(latitude, longitude); // Set the location
+            });
           } else {
-            throw Exception('Location not found');
+            throw Exception('Invalid location format');
           }
-          return space;
         } else {
-          throw Exception('Space not found');
+          throw Exception('Location not found');
         }
-      });
-    }
+        return space;
+      } else {
+        throw Exception('Space not found');
+      }
+    });
   }
 
   // Mapping amenities to icons
@@ -101,6 +104,7 @@ class _ViewSpaceState extends State<ViewSpace> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: FutureBuilder<DocumentSnapshot>(
         future: spaceData,
         builder: (context, snapshot) {
@@ -117,16 +121,21 @@ class _ViewSpaceState extends State<ViewSpace> {
           }
 
           var space = snapshot.data!;
+          String spaceId = space.id;
           String spaceName = space['spaceName'] ?? 'Unknown Space';
           String description =
               space['description'] ?? 'No description available';
           List<String> amenities =
               List<String>.from(space['selectedAmenities'] ?? []);
-          String price = space['monthlyPrice'] ?? '0';
-          List<String> roomTypes = List<String>.from(space['roomType'] ?? []);
+          String price = space['hoursPrice'] ?? '0';
+          // Check if roomType is a list or a single string
+          List<String> roomTypes = (space['roomType'] is List)
+              ? List<String>.from(space['roomType'] ?? [])
+              : [space['roomType'] ?? 'Unknown'];
+
+          String roomType = roomTypes.isNotEmpty ? roomTypes.first : 'Unknown';
 
           // If there's more than one room type, display only the first one.
-          String roomType = roomTypes.isNotEmpty ? roomTypes.first : 'Unknown';
 
           final base64Image = space['imagePath'] ?? '';
 
@@ -157,7 +166,7 @@ class _ViewSpaceState extends State<ViewSpace> {
                         imageBytes,
                         fit: BoxFit
                             .cover, // You can change the BoxFit to control how the image fits
-                      ), // Display image using Image.memory
+                      ),
                     ),
                   )
                 else if (base64Image.isEmpty)
@@ -274,7 +283,8 @@ class _ViewSpaceState extends State<ViewSpace> {
                 ElevatedButton(
                   onPressed: () {
                     // Add functionality for availability check
-                    Navigator.pushNamed(context, '/edit_space');
+                    Navigator.pushNamed(context, '/add_details',
+                        arguments: spaceId);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
@@ -284,7 +294,7 @@ class _ViewSpaceState extends State<ViewSpace> {
                     ),
                   ),
                   child: const Text(
-                    'Edit Space',
+                    'Book Now',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
@@ -298,27 +308,24 @@ class _ViewSpaceState extends State<ViewSpace> {
 
   Widget _buildFacilityIcon(IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.only(right: 12.0, bottom: 8.0),
-      child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
         children: [
-          Icon(icon, size: 30),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12),
-          ),
+          Icon(icon, color: Colors.blue, size: 24),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );
   }
 
   Widget _loadImageFromFile(DocumentSnapshot space) {
-    final imagePath =
-        space['imagePath']; // Assuming the image is stored as a file path
-    if (imagePath != null) {
-      return Image.network(imagePath); // You can use a URL to load an image
-    } else {
-      return const Icon(Icons.image, size: 150);
-    }
+    return space['imagePath'] != null
+        ? Image.network(
+            space['imagePath']!,
+            fit: BoxFit.cover,
+            height: 200, // Example height, adjust as needed
+          )
+        : const SizedBox.shrink(); // Placeholder when no image path is found
   }
 }

@@ -110,7 +110,7 @@ class _CreateSpaceState extends State<CreateSpace> {
           spaceName:
               _spaceController.text.trim(), // Provide default value if null
           description: _descriptionController.text.trim(), // Default if null
-          monthlyPrice: _monthlyPrice ?? "0", // Default price if null
+          hoursPrice: _monthlyPrice ?? "0", // Default price if null
           city: _city ?? "Unknown City", // Default city if null
           location: _location ?? "0.0, 0.0", // Default location if null
           imagePath: _base64Image, // This can remain null if not selected

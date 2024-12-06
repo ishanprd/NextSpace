@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Space {
   String spaceName;
   String description;
-  String monthlyPrice;
+  String hoursPrice;
   String city;
   String location;
   String? imagePath;
@@ -16,7 +16,7 @@ class Space {
   Space({
     required this.spaceName,
     required this.description,
-    required this.monthlyPrice,
+    required this.hoursPrice,
     required this.city,
     required this.location,
     this.imagePath,
@@ -32,7 +32,7 @@ class Space {
     return {
       'spaceName': spaceName,
       'description': description,
-      'monthlyPrice': monthlyPrice,
+      'hoursPrice': hoursPrice,
       'city': city,
       'location': location,
       'imagePath': imagePath,
@@ -51,7 +51,7 @@ class Space {
     return Space(
       spaceName: data['spaceName'],
       description: data['description'],
-      monthlyPrice: data['monthlyPrice'],
+      hoursPrice: data['hoursPrice'],
       city: data['city'],
       location: data['location'],
       imagePath: data['imagePath'],

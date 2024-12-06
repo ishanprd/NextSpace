@@ -53,7 +53,7 @@ class _EditSpaceState extends State<EditSpace> {
     'Event Space',
     'Elevator',
   ];
-  final List<String> _roomType = [];
+  String? _roomType;
   final List<String> _roomTypes = [
     'Private Office',
     'Meeting Room',
@@ -95,7 +95,7 @@ class _EditSpaceState extends State<EditSpace> {
           _base64Image = data['imagePath'] ?? '';
           _selectedAmenities
               .addAll(List<String>.from(data['selectedAmenities'] ?? []));
-          _roomType.addAll(List<String>.from(data['roomType'] ?? []));
+          _roomType = data['roomType'];
           _isLoading = false; // Data has been fetched
         });
       } else {
@@ -192,18 +192,6 @@ class _EditSpaceState extends State<EditSpace> {
           _selectedAmenities.add(amenity);
         } else {
           _selectedAmenities.remove(amenity);
-        }
-      }
-    });
-  }
-
-  void _onTypeSelected(bool? selected, String roomType) {
-    setState(() {
-      if (selected != null) {
-        if (selected) {
-          _roomType.add(roomType);
-        } else {
-          _roomType.remove(roomType);
         }
       }
     });
@@ -406,22 +394,7 @@ class _EditSpaceState extends State<EditSpace> {
                       }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      "Room Types",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    Column(
-                      children: _roomTypes.map((type) {
-                        return CheckboxListTile(
-                          title: Text(type),
-                          value: _roomType.contains(type),
-                          onChanged: (bool? selected) {
-                            _onTypeSelected(selected, type);
-                          },
-                        );
-                      }).toList(),
-                    ),
+                    _buildRoomTypeSelection(),
                     const SizedBox(height: 20),
                     OutlinedButton.icon(
                       onPressed: uploadimage,
@@ -492,6 +465,30 @@ class _EditSpaceState extends State<EditSpace> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildRoomTypeSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Select Room Type",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        ..._roomTypes.map((roomType) {
+          return RadioListTile<String>(
+            title: Text(roomType),
+            value: roomType,
+            groupValue: _roomType,
+            onChanged: (value) {
+              setState(() {
+                _roomType = value;
+              });
+            },
+          );
+        }).toList(),
+      ],
     );
   }
 }

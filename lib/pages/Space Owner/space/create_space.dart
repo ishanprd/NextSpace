@@ -45,7 +45,7 @@ class _CreateSpaceState extends State<CreateSpace> {
     'Event Space',
     'Elevator',
   ];
-  final List<String> _roomType = []; // Variable to hold selected room type
+  String _roomType = ''; // Variable to hold selected room type
   final List<String> _roomTypes = [
     'Private Office',
     'Meeting Room',
@@ -78,13 +78,9 @@ class _CreateSpaceState extends State<CreateSpace> {
     });
   }
 
-  void _onTypeSelected(bool? selected, String amenity) {
+  void _onTypeSelected(String type) {
     setState(() {
-      if (selected == true) {
-        _roomType.add(amenity);
-      } else {
-        _roomType.remove(amenity);
-      }
+      _roomType = type; // Set the selected room type
     });
   }
 
@@ -121,7 +117,7 @@ class _CreateSpaceState extends State<CreateSpace> {
           selectedAmenities: _selectedAmenities,
           roomType: _roomType,
           ownerId: ownerId,
-          status: 'request', // Replace with actual owner ID
+          status: 'Pending', // Replace with actual owner ID
           createdAt: Timestamp.fromDate(DateTime.now()),
         );
 
@@ -143,7 +139,7 @@ class _CreateSpaceState extends State<CreateSpace> {
           _imagePath = null;
           _location = null;
           _selectedAmenities.clear();
-          _roomType.clear();
+          _roomTypes.clear();
         });
       } catch (e) {
         // Handle errors
@@ -213,7 +209,7 @@ class _CreateSpaceState extends State<CreateSpace> {
               // Monthly Price Field
               TextFormField(
                 decoration: const InputDecoration(
-                  labelText: "Monthly Price",
+                  labelText: "Price Per Hours",
                   border: OutlineInputBorder(),
                   prefixText: "Rs.",
                 ),
@@ -290,12 +286,16 @@ class _CreateSpaceState extends State<CreateSpace> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Column(
-                children: _roomTypes.map((amenity) {
-                  return CheckboxListTile(
-                    title: Text(amenity),
-                    value: _roomType.contains(amenity),
-                    onChanged: (bool? selected) {
-                      _onTypeSelected(selected, amenity);
+                children: _roomTypes.map((type) {
+                  return RadioListTile<String>(
+                    title: Text(type),
+                    value: type,
+                    groupValue:
+                        _roomType, // The groupValue is the current selected room type
+                    onChanged: (String? selectedType) {
+                      if (selectedType != null) {
+                        _onTypeSelected(selectedType);
+                      }
                     },
                   );
                 }).toList(),

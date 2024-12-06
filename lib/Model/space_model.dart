@@ -8,7 +8,7 @@ class Space {
   String location;
   String? imagePath;
   List<String> selectedAmenities;
-  List<String> roomType;
+  String roomType;
   String ownerId;
   String status;
   Timestamp createdAt;
@@ -56,7 +56,7 @@ class Space {
       location: data['location'],
       imagePath: data['imagePath'],
       selectedAmenities: List<String>.from(data['selectedAmenities']),
-      roomType: List<String>.from(data['roomType']),
+      roomType: data['roomType'],
       ownerId: data['ownerId'],
       status: data['status'],
       createdAt: data['createdAt'],

@@ -123,7 +123,8 @@ class _ViewSpaceState extends State<ViewSpace> {
           List<String> amenities =
               List<String>.from(space['selectedAmenities'] ?? []);
           String price = space['monthlyPrice'] ?? '0';
-          List<String> roomTypes = List<String>.from(space['roomType'] ?? []);
+          String roomType = space['roomType'] ?? '';
+
           final base64Image = space['imagePath'] ?? '';
 
           Uint8List? imageBytes;
@@ -188,7 +189,7 @@ class _ViewSpaceState extends State<ViewSpace> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Rp. $price / Month',
+                      'Rs. $price / Hours',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -243,11 +244,10 @@ class _ViewSpaceState extends State<ViewSpace> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  children: roomTypes.map((roomType) {
-                    return _buildFacilityIcon(
-                        getRoomTypeIcon(roomType), roomType);
-                  }).toList(),
+                Row(
+                  children: [
+                    _buildFacilityIcon(getRoomTypeIcon(roomType), roomType),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 _spaceLocation == null

@@ -124,6 +124,10 @@ class _ViewSpaceState extends State<ViewSpace> {
               List<String>.from(space['selectedAmenities'] ?? []);
           String price = space['monthlyPrice'] ?? '0';
           List<String> roomTypes = List<String>.from(space['roomType'] ?? []);
+
+          // If there's more than one room type, display only the first one.
+          String roomType = roomTypes.isNotEmpty ? roomTypes.first : 'Unknown';
+
           final base64Image = space['imagePath'] ?? '';
 
           Uint8List? imageBytes;
@@ -236,19 +240,14 @@ class _ViewSpaceState extends State<ViewSpace> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Room Types',
+                  'Room Type', // Display only one room type
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  children: roomTypes.map((roomType) {
-                    return _buildFacilityIcon(
-                        getRoomTypeIcon(roomType), roomType);
-                  }).toList(),
-                ),
+                _buildFacilityIcon(getRoomTypeIcon(roomType), roomType),
                 const SizedBox(height: 24),
                 _spaceLocation == null
                     ? const Center(child: CircularProgressIndicator())
@@ -299,31 +298,27 @@ class _ViewSpaceState extends State<ViewSpace> {
 
   Widget _buildFacilityIcon(IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.only(right: 16.0),
+      padding: const EdgeInsets.only(right: 12.0, bottom: 8.0),
       child: Column(
         children: [
-          Icon(icon, size: 32, color: Colors.blue),
+          Icon(icon, size: 30),
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  // Helper function to load image from file path
   Widget _loadImageFromFile(DocumentSnapshot space) {
-    String imagePath = space['imagePath'] ?? '';
-    if (imagePath.isNotEmpty) {
-      return Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        height: 200,
-        width: double.infinity,
-      );
+    final imagePath =
+        space['imagePath']; // Assuming the image is stored as a file path
+    if (imagePath != null) {
+      return Image.network(imagePath); // You can use a URL to load an image
+    } else {
+      return const Icon(Icons.image, size: 150);
     }
-    return Container(); // Return empty container if no image found
   }
 }

@@ -10,7 +10,7 @@ class Chat extends StatefulWidget {
 class _ChatState extends State<Chat> {
   final List<Message> messages = [
     Message("Fauziah", "I will do the voice over", "10:30 PM",
-        "assets/avatar1.png", true),
+        "assets/space.png", true),
     Message(
         "Nicole", "just open la 😁😉", "3:15 PM", "assets/avatar2.png", false),
     Message("Brian", "bye 😊", "Yesterday", "assets/avatar3.png", true),
@@ -31,7 +31,7 @@ class _ChatState extends State<Chat> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.blue,
         title: const Center(child: Text('Messages')),
         automaticallyImplyLeading: false,
         actions: [

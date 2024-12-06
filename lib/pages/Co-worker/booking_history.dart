@@ -33,12 +33,14 @@ class _BookingHistoryState extends State<BookingHistory> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Booking History",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.blue,
-      ),
+          title: const Center(
+            child: Text(
+              "Booking History",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          backgroundColor: Colors.blue,
+          automaticallyImplyLeading: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(

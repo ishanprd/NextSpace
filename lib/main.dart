@@ -22,7 +22,7 @@ import 'package:nextspace/pages/authentication/signup/space_owner/signup_page_fo
 import 'package:nextspace/pages/authentication/signup/signup_page.dart';
 import 'package:nextspace/pages/authentication/signup/co-worker/signup_page_for_coworker.dart';
 import 'package:nextspace/navigation/owner_navigation.dart';
-import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';
+import 'package:nextspace/navigation/coworker_navigation.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/edit_profile.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/feedback.dart';
 
@@ -43,7 +43,7 @@ class NextSpace extends StatelessWidget {
       title: 'Next Space',
       theme: ThemeData(
           // Defines the app's theme with a deep purple color scheme
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
           useMaterial3: true,
           fontFamily: 'Inter' // Enable Material 3 components
           ),
@@ -64,7 +64,7 @@ class NextSpace extends StatelessWidget {
         '/emailverification/spaceowner': (context) =>
             const EmailVerificationForSpaceOwner(),
         '/reset_password': (context) => const ResetPassword(),
-        '/coworker_dashboard': (context) => const CoworkerDashboard(),
+        '/coworker': (context) => const CoworkerNavigation(),
         '/space_owner': (context) => const SpaceOwnerNavigation(),
         '/edit_profile': (context) => const EditProfile(),
         '/feedback': (context) => const SpaceFeedback(),

@@ -124,7 +124,7 @@ class AuthService {
 
       // Navigate to the respective dashboard based on the role
       if (role == 'coworker') {
-        Navigator.pushNamed(context, '/coworker_dashboard');
+        Navigator.pushNamed(context, '/coworker');
       } else if (role == 'space_owner') {
         Navigator.pushNamed(context, '/space_owner');
       } else if (role == 'admin') {

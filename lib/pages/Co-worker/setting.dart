@@ -5,10 +5,10 @@ class CoWorkerSetting extends StatefulWidget {
   const CoWorkerSetting({super.key});
 
   @override
-  State<CoWorkerSetting> createState() => _AdminSettingState();
+  State<CoWorkerSetting> createState() => _CoWorkerSettingState();
 }
 
-class _AdminSettingState extends State<CoWorkerSetting> {
+class _CoWorkerSettingState extends State<CoWorkerSetting> {
   AuthService auth = AuthService();
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _AdminSettingState extends State<CoWorkerSetting> {
             icon: Icons.person_outline,
             title: 'Edit profile',
             onTap: () {
-              Navigator.pushNamed(context, '/edit_admin_profile');
+              Navigator.pushNamed(context, '/edit_profile');
             },
           ),
 
@@ -39,14 +39,14 @@ class _AdminSettingState extends State<CoWorkerSetting> {
             icon: Icons.notifications_outlined,
             title: 'Notifications',
             onTap: () {
-              Navigator.pushNamed(context, '/admin_notifications');
+              Navigator.pushNamed(context, '/notifications');
             },
           ),
           SettingsTile(
             icon: Icons.feedback_outlined,
-            title: 'Issues and problems',
+            title: 'Feedbacks',
             onTap: () {
-              Navigator.pushNamed(context, '/issues');
+              Navigator.pushNamed(context, '/feedback');
             },
           ),
 
@@ -54,11 +54,25 @@ class _AdminSettingState extends State<CoWorkerSetting> {
           const SectionTitle(title: 'Support & About'),
 
           SettingsTile(
+            icon: Icons.help_outline,
+            title: 'Help & Support',
+            onTap: () {},
+          ),
+          SettingsTile(
             icon: Icons.info_outline,
             title: 'Terms and Policies',
             onTap: () {},
           ),
+
+          // Cache & Cellular Section
+
+          // Actions Section
           const SectionTitle(title: 'Actions'),
+          SettingsTile(
+            icon: Icons.report_problem_outlined,
+            title: 'Report a problem',
+            onTap: () {},
+          ),
 
           SettingsTile(
             icon: Icons.logout,

@@ -24,6 +24,7 @@ class _CoworkerNavigationState extends State<CoworkerNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {
@@ -42,11 +43,11 @@ class _CoworkerNavigationState extends State<CoworkerNavigation> {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+            icon: Icon(Icons.search_rounded),
             label: "Search",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history),
+            icon: Icon(Icons.history_rounded),
             label: "Booking History",
           ),
           BottomNavigationBarItem(

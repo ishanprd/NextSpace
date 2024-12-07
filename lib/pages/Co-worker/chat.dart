@@ -35,6 +35,7 @@ class _ChatState extends State<Chat> {
             appBar: AppBar(
               centerTitle: true,
               title: const Text("Chat"),
+              automaticallyImplyLeading: false,
             ),
             body: SafeArea(
               child: StreamBuilder(
@@ -47,6 +48,13 @@ class _ChatState extends State<Chat> {
                     if (snapshot.hasData) {
                       QuerySnapshot chatRoomSnapshot =
                           snapshot.data as QuerySnapshot;
+
+                      // Check if there are no chatrooms available
+                      if (chatRoomSnapshot.docs.isEmpty) {
+                        return const Center(
+                          child: Text("No Chats"),
+                        );
+                      }
 
                       return ListView.builder(
                         itemCount: chatRoomSnapshot.docs.length,

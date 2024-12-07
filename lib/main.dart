@@ -4,7 +4,7 @@ import 'package:nextspace/navigation/admin_navigation.dart';
 import 'package:nextspace/navigation/chat_navigation.dart';
 import 'package:nextspace/pages/Co-worker/book/add_detail.dart';
 import 'package:nextspace/pages/Co-worker/book/payment.dart';
-import 'package:nextspace/pages/Space%20Owner/chat/conversation.dart';
+import 'package:nextspace/pages/Space%20Owner/chat/chat.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space/create_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space/edit_space.dart';
@@ -73,7 +73,7 @@ class NextSpace extends StatelessWidget {
         '/edit_profile': (context) => const EditProfile(),
         '/feedback': (context) => const SpaceFeedback(),
         '/notifications': (context) => const SpaceNotification(),
-        '/conversations': (context) => const Conversation(),
+        '/conversations': (context) => const Chat(),
         '/create_space': (context) => const CreateSpace(),
         '/view_space': (context) => const ViewSpace(),
         '/admin': (context) => const AdminNavigation(),

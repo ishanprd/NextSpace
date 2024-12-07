@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nextspace/pages/Space%20Owner/booking.dart';
+import 'package:nextspace/pages/Space%20Owner/chat/chat.dart';
 import 'package:nextspace/pages/Space%20Owner/space/view_space.dart';
-import 'package:nextspace/pages/Space%20Owner/space_message.dart';
 import 'package:nextspace/pages/Space%20Owner/space_owner_dashboard.dart';
 import 'package:nextspace/pages/Space%20Owner/space_page.dart';
 import 'package:nextspace/pages/Space%20Owner/space_setting.dart';
@@ -53,7 +53,7 @@ class _SpaceOwnerNavigationState extends State<SpaceOwnerNavigation> {
     const SpaceOwnerDashboard(),
     const ViewSpace(), // This will be conditionally rendered
     const Booking(),
-    const SpaceMessage(),
+    const Chat(),
     const SpaceSetting(),
   ];
 

@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingHistory extends StatefulWidget {
   const BookingHistory({super.key});
@@ -8,100 +10,105 @@ class BookingHistory extends StatefulWidget {
 }
 
 class _BookingHistoryState extends State<BookingHistory> {
-  final List<Map<String, String>> bookingHistory = [
-    {
-      "title": "Luxury Suite",
-      "date": "Dec 2, 2024",
-      "status": "Confirmed",
-      "price": "\$200",
-    },
-    {
-      "title": "Deluxe Room",
-      "date": "Nov 20, 2024",
-      "status": "Cancelled",
-      "price": "\$150",
-    },
-    {
-      "title": "Executive Room",
-      "date": "Nov 15, 2024",
-      "status": "Completed",
-      "price": "\$180",
-    },
-  ];
+  // Firestore reference and Firebase Authentication instance
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
+    final String userId =
+        _auth.currentUser?.uid ?? ''; // Dynamically fetch userId
+    final Query _bookings = FirebaseFirestore.instance
+        .collection('bookings')
+        .where('userId', isEqualTo: userId);
+
     return Scaffold(
       appBar: AppBar(
-          title: const Center(
-            child: Text(
-              "Booking History",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+        title: const Center(
+          child: Text(
+            "Booking History",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Colors.blue,
-          automaticallyImplyLeading: false),
+        ),
+        backgroundColor: Colors.blue,
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: bookingHistory.length,
-          itemBuilder: (context, index) {
-            final booking = bookingHistory[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 16.0),
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      booking["title"]!,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Date: ${booking["date"]}",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _bookings.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text("No booking history found."));
+            }
+
+            final bookingHistory = snapshot.data!.docs;
+
+            return ListView.builder(
+              itemCount: bookingHistory.length,
+              itemBuilder: (context, index) {
+                final booking = bookingHistory[index];
+                final data = booking.data() as Map<String, dynamic>;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Status: ${booking["status"]}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: booking["status"] == "Cancelled"
-                                ? Colors.red
-                                : booking["status"] == "Confirmed"
-                                    ? Colors.blue
-                                    : Colors.green,
+                          data["spaceName"] ?? "N/A",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 8),
                         Text(
-                          "Price: ${booking["price"]}",
+                          "Date: ${data["date"] ?? "N/A"}",
                           style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
+                            color: Colors.grey,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Status: ${data["status"] ?? "N/A"}",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: data["status"] == "Cancelled"
+                                    ? Colors.red
+                                    : data["status"] == "Confirmed"
+                                        ? Colors.blue
+                                        : Colors.green,
+                              ),
+                            ),
+                            Text(
+                              "Price: ${data["price"] ?? "N/A"}",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             );
           },
         ),

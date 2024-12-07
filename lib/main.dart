@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nextspace/navigation/admin_navigation.dart';
+import 'package:nextspace/navigation/chat_navigation.dart';
 import 'package:nextspace/pages/Co-worker/book/add_detail.dart';
 import 'package:nextspace/pages/Co-worker/book/payment.dart';
 import 'package:nextspace/pages/Space%20Owner/chat/conversation.dart';
@@ -84,6 +85,7 @@ class NextSpace extends StatelessWidget {
         '/view_space_for_book': (context) => const ViewSpaceForBook(),
         '/add_details': (context) => const AddDetail(),
         '/payments': (context) => const PaymentPage(),
+        '/chat': (context) => const ChatNavigation(),
       },
     );
   }

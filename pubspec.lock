@@ -161,6 +161,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
+  esewa_flutter_sdk:
+    dependency: "direct main"
+    description:
+      path: "eSewa Flutter Sdk/esewa_flutter_sdk"
+      relative: true
+    source: path
+    version: "2.4.0+17"
   fake_async:
     dependency: transitive
     description:
@@ -489,7 +496,7 @@ packages:
     source: hosted
     version: "0.2.1+1"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"

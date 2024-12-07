@@ -42,13 +42,6 @@ class _CoWorkerSettingState extends State<CoWorkerSetting> {
               Navigator.pushNamed(context, '/notifications');
             },
           ),
-          SettingsTile(
-            icon: Icons.feedback_outlined,
-            title: 'Feedbacks',
-            onTap: () {
-              Navigator.pushNamed(context, '/feedback');
-            },
-          ),
 
           // Support & About Section
           const SectionTitle(title: 'Support & About'),

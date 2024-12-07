@@ -487,7 +487,7 @@ class _EditSpaceState extends State<EditSpace> {
               });
             },
           );
-        }).toList(),
+        }),
       ],
     );
   }

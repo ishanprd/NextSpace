@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SearchSpace extends StatefulWidget {
   const SearchSpace({super.key});
@@ -12,30 +16,47 @@ class _SearchSpaceState extends State<SearchSpace> {
   late GoogleMapController _mapController;
   Map<String, dynamic>?
       selectedSpace; // To store details of the selected space.
+  List<Map<String, dynamic>> spaces = []; // Dynamic list for spaces
+  bool isLoading = true;
+  Uint8List? imageBytes;
 
-  // Dummy data for spaces
-  final List<Map<String, dynamic>> spaces = [
-    {
-      'id': '1',
-      'image': 'assets/background.jpg',
-      'name': 'Workpair Co',
-      'description': 'WiFi · Coffee · Meeting Room',
-      'price': 'Rp. 125.000 / Hour',
-      'rating': '4.9',
-      'latitude': -6.200000,
-      'longitude': 106.816666,
-    },
-    {
-      'id': '2',
-      'image': 'assets/background.jpg',
-      'name': 'Office Spot',
-      'description': 'WiFi · Quiet Zone · Meeting Room',
-      'price': 'Rp. 100.000 / Hour',
-      'rating': '4.8',
-      'latitude': -6.210000,
-      'longitude': 106.825000,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchSpaces(); // Fetch spaces from Firebase
+  }
+
+  // Fetch spaces from Firebase
+  Future<void> _fetchSpaces() async {
+    try {
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('spaces').get();
+      final fetchedSpaces = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'id': doc.id,
+          'name': data['spaceName'],
+          'description': data['description'],
+          'price': 'Rs. ${data['hoursPrice']} / Hour',
+          'rating': '4.5', // You can modify if ratings exist in Firebase
+          'latitude': double.parse(data['location'].split(',')[0]),
+          'longitude': double.parse(data['location'].split(',')[1]),
+          'image': data['imagePath'], // Ensure this is a valid image URL
+          'amenities': data['selectedAmenities'],
+        };
+      }).toList();
+
+      setState(() {
+        spaces = fetchedSpaces;
+        isLoading = false;
+      });
+    } catch (e) {
+      // Handle errors (e.g., connection issues)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching spaces: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,50 +70,62 @@ class _SearchSpaceState extends State<SearchSpace> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        // Add SingleChildScrollView to make it scrollable
-        child: Column(
-          children: [
-            // Google Map
-            Container(
-              height: 300, // Fixed height for Google Map
-              child: GoogleMap(
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(-6.200000, 106.816666),
-                  zoom: 14,
-                ),
-                onMapCreated: (controller) {
-                  _mapController = controller;
-                },
-                markers: _buildMarkers(),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator()) // Show loading spinner
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Google Map
+                  SizedBox(
+                    height: 300, // Fixed height for Google Map
+                    child: GoogleMap(
+                      initialCameraPosition: const CameraPosition(
+                        target: LatLng(27.6731, 85.3249), // Default location
+                        zoom: 14,
+                      ),
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                      },
+                      markers: _buildMarkers(),
+                    ),
+                  ),
+
+                  // Space Details Section
+                  if (selectedSpace != null)
+                    _buildSpaceDetails(selectedSpace!)
+                  else
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text("Tap on a marker to view details."),
+                      ),
+                    ),
+                ],
               ),
             ),
-
-            // Space Details Section
-            if (selectedSpace != null)
-              _buildSpaceDetails(selectedSpace!)
-            else
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Center(
-                  child: Text("Tap on a marker to view details."),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 
   // Build markers for Google Map
   Set<Marker> _buildMarkers() {
     return spaces.map((space) {
+      final base64Image = space['image'];
+
+      if (base64Image.isNotEmpty) {
+        try {
+          imageBytes = base64Decode(base64Image); // Decode base64 image data
+        } catch (e) {
+          print('Error decoding base64: $e');
+          imageBytes = null; // Handle decoding error
+        }
+      } //
       return Marker(
         markerId: MarkerId(space['id']),
         position: LatLng(space['latitude'], space['longitude']),
         infoWindow: InfoWindow(
           title: space['name'],
-          snippet: space['description'],
+          snippet: space['price'],
         ),
         onTap: () {
           setState(() {
@@ -119,12 +152,19 @@ class _SearchSpaceState extends State<SearchSpace> {
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(16),
             ),
-            child: Image.asset(
-              space['image'], // Ensure the correct image path is provided
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: imageBytes != null
+                ? Image.memory(
+                    imageBytes!, // Use MemoryImage to display byte data
+                    fit: BoxFit.cover,
+                    height: 200,
+                    width: double.infinity,
+                  )
+                : Image.asset(
+                    'assets/userprofile.jpg', // Fallback to an asset image
+                    fit: BoxFit.cover,
+                    height: 200,
+                    width: double.infinity,
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -156,42 +196,20 @@ class _SearchSpaceState extends State<SearchSpace> {
                 ),
                 const SizedBox(height: 8),
 
-                // Rating
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                    const SizedBox(width: 4),
-                    Text(space['rating']),
-                  ],
+                // Amenities
+                Text(
+                  "Amenities: ${space['amenities'].join(', ')}",
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Book Now Button
                 ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(Colors.blueAccent),
-                    padding: WidgetStateProperty.all(const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16)),
-                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    )),
-                  ),
                   onPressed: () {
-                    // Add booking logic here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Booked ${space['name']}"),
-                      ),
-                    );
+                    Navigator.pushNamed(context, '/view_space_for_book',
+                        arguments: space['id']);
                   },
-                  child: const Text(
-                    "Book Now",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  child: const Text("View Space"),
                 ),
               ],
             ),

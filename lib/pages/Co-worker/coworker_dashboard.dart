@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -15,7 +15,8 @@ class CoworkerDashboard extends StatefulWidget {
 class _CoworkerDashboardState extends State<CoworkerDashboard> {
   final TextEditingController _searchController = TextEditingController();
   double _selectedPriceRange = 500.0; // Default price range
-  String? _selectedRoomType; // Changed to List<String>
+  String? _selectedRoomType;
+  String? Name; // Changed to List<String>
   final List<String> _selectedAmenities =
       []; // Added to hold selected amenities
   List<Map<String, dynamic>> _filteredSpaces = [];
@@ -29,6 +30,41 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
     super.initState();
     // Fetch data from Firestore on init
     _fetchSpaces();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    try {
+      // Get the current signed-in user
+      final User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Fetch the user document from Firestore using the user's UID
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users') // Assuming you have a 'users' collection
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          // Get the user data from the document as a Map
+          var userData = userDoc.data() as Map<String, dynamic>;
+
+          // Assign the fullName field from Firestore to the Name variable
+          setState(() {
+            Name = userData['fullName'];
+          });
+
+          ''; // Default to an empty string if not found
+          // Optional: Print user's name for debugging
+        } else {
+          print("User document doesn't exist in Firestore.");
+        }
+      } else {
+        print("No user is currently signed in.");
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+    }
   }
 
   // Fetch spaces from Firestore
@@ -155,11 +191,11 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome Text
-              const Padding(
-                padding: EdgeInsets.only(top: 50.0),
+              Padding(
+                padding: const EdgeInsets.only(top: 50.0),
                 child: Text(
-                  "Hi Michael, where you\nwanna work today?",
-                  style: TextStyle(
+                  "Hi $Name , where you\nwanna work today?",
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -320,7 +356,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                   space['features'], // Pass amenities here
                   imageBytes,
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),

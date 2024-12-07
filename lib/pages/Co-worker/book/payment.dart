@@ -1,4 +1,11 @@
+import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:esewa_flutter_sdk/esewa_config.dart';
+import 'package:esewa_flutter_sdk/esewa_flutter_sdk.dart';
+import 'package:esewa_flutter_sdk/esewa_payment.dart';
+import 'package:esewa_flutter_sdk/esewa_payment_success_result.dart';
+import 'package:nextspace/static_value.dart';
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -25,22 +32,135 @@ class _PaymentPageState extends State<PaymentPage> {
         // Default booking data in case no arguments are passed
         bookingData = {
           'date': '2024-12-06',
-          'time': '10:00 AM',
+          'hours': '2.00', // Time is a string here
           'spaceName': 'Conference Room A',
-          'price': 20.0, // Price per hour
+          'price': '20.0', // Price is now a string for consistency
         };
       }
     });
   }
 
+  Future<void> _saveBooking(EsewaPaymentSuccessResult paymentData) async {
+    try {
+      final booking = {
+        'spaceName': bookingData['spaceName'],
+        'price': bookingData['price'],
+        'city': bookingData['city'],
+        'spaceId': bookingData['spaceId'],
+        'userId': bookingData['userId'],
+        'paymentType': bookingData['paymentType'],
+        'paymentStatus': 'Success',
+        'date': bookingData['date'], // Use intl here
+        'hours': bookingData['hours'],
+        'status': 'Pending',
+        'transactionId': paymentData.productId,
+        'createdAt': bookingData['createdAt'],
+      };
+
+      await FirebaseFirestore.instance.collection('bookings').add(booking);
+    } catch (e) {
+      print('Error saving booking: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Failed to save booking. Please try again.')),
+      );
+    }
+  }
+
+  Future<void> _payment_complete(EsewaPaymentSuccessResult paymentData) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Save payment details to Firestore
+      final paymentCollection =
+          FirebaseFirestore.instance.collection('payments');
+      await paymentCollection.add({
+        'transaction_id': paymentData.productId,
+        'productName': paymentData.productName, // Transaction ID from Esewa
+        'amount': paymentData.totalAmount, // Payment amount
+        'status': 'success',
+        'timestamp': FieldValue.serverTimestamp(), // Timestamp
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment completed successfully!')),
+      );
+
+      Navigator.pushNamed(context, '/coworker');
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment failed: $e')),
+      );
+    }
+  }
+
+  String generateRandomString(int length) {
+    const characters =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    final random = Random();
+    return String.fromCharCodes(
+      Iterable.generate(
+        length,
+        (_) => characters.codeUnitAt(random.nextInt(characters.length)),
+      ),
+    );
+  }
+
+  void esewapaymentcall(String spaceName, String price) {
+    try {
+      EsewaFlutterSdk.initPayment(
+        esewaConfig: EsewaConfig(
+          environment: Environment.test,
+          clientId: StaticValue.CLIENT_ID,
+          secretId: StaticValue.SECRET_KEY,
+        ),
+        esewaPayment: EsewaPayment(
+          productId: generateRandomString(30),
+          productName: 'Kumud Space',
+          productPrice: price,
+          callbackUrl: '',
+        ),
+        onPaymentSuccess: (EsewaPaymentSuccessResult data) {
+          debugPrint(":::SUCCESS::: => $data");
+          _payment_complete(data);
+          _saveBooking(data);
+        },
+        onPaymentFailure: (data) {
+          debugPrint(":::FAILURE::: => $data");
+        },
+        onPaymentCancellation: (data) {
+          debugPrint(":::CANCELLATION::: => $data");
+        },
+      );
+    } on Exception catch (e) {
+      debugPrint("EXCEPTION : ${e.toString()}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Show a loader until bookingData is available
+    if (bookingData == null) {
+      // Show a loader until bookingData is available
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final date = bookingData['date'];
-    final time = bookingData['hours'];
+    final timeString = bookingData['hours'] ?? '0.0';
+    final double time = double.tryParse(timeString) ?? 0.0; // Safely parse time
     final spaceName = bookingData['spaceName'];
-    final pricePerHour = bookingData['price'];
-    final totalPrice = pricePerHour * time;
+
+    // Parse pricePerHour as double, even if it's passed as String
+    final priceString = bookingData['price'] ?? '0.0';
+    final double pricePerHour = double.tryParse(priceString) ?? 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +196,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             ListTile(
               leading: Image.asset(
-                'esewa.png', // Add an appropriate asset for Esewa.
+                'assets/esewa.png', // Add an appropriate asset for Esewa.
                 height: 40,
               ),
               title: const Text('Esewa'),
@@ -93,7 +213,9 @@ class _PaymentPageState extends State<PaymentPage> {
             ListTile(
               leading: const Icon(Icons.meeting_room, size: 40),
               title: Text(spaceName),
-              subtitle: Text('Rate: Rs${pricePerHour.toStringAsFixed(2)}/hour'),
+              subtitle: Text(
+                'Total Rs ${pricePerHour.toStringAsFixed(2)}',
+              ),
             ),
             const Spacer(),
 
@@ -102,17 +224,13 @@ class _PaymentPageState extends State<PaymentPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Implement payment logic here
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Payment Successful!')),
-                  );
-                  Navigator.pop(context);
+                  esewapaymentcall(spaceName, priceString);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-                child: Text('Pay Now (Rs${totalPrice.toStringAsFixed(2)})'),
+                child: Text('Pay Now (Rs${pricePerHour.toStringAsFixed(2)})'),
               ),
             ),
           ],

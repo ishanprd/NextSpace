@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AddDetail extends StatefulWidget {
   const AddDetail({super.key});
@@ -53,7 +54,7 @@ class _AddDetailState extends State<AddDetail> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        dateController.text = '${picked.toLocal()}'.split(' ')[0];
+        dateController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
   }
@@ -140,17 +141,20 @@ class _AddDetailState extends State<AddDetail> {
       if (userId == null) {
         throw Exception('User not logged in');
       }
+      double totalAmount = price * hours;
 
       final bookingData = {
         'spaceName': spaceName,
-        'price': price,
+        'price': totalAmount.toStringAsFixed(2),
         'city': placeName,
         'spaceId': spaceid,
         'userId': userId,
         'paymentType': selectedMethod,
-        'date': selectedDate!.toIso8601String(),
-        'hours': hours,
+        'paymentStatus': 'Pending',
+        'date': DateFormat('yyyy-MM-dd').format(selectedDate!), // Use intl here
+        'hours': hours.toStringAsFixed(2),
         'status': 'Pending',
+        'transactionId': '',
         'createdAt': FieldValue.serverTimestamp(),
       };
 
@@ -204,7 +208,7 @@ class _AddDetailState extends State<AddDetail> {
               const SizedBox(height: 16),
               Text('Space Name: $spaceName'),
               Text('Place: $placeName'),
-              Text('Price: \$${price.toStringAsFixed(2)}'),
+              Text('Rate: Rs ${price.toStringAsFixed(2)} per hour'),
               const SizedBox(height: 16),
               TextFormField(
                 controller: dateController,

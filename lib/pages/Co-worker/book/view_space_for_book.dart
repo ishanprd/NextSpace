@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:convert'; // Needed for base64 decoding
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -16,6 +17,12 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
   LatLng? _spaceLocation; // To store the space's latitude and longitude
   late GoogleMapController mapController;
 
+  final CollectionReference feedbackCollection =
+      FirebaseFirestore.instance.collection('feedbacks');
+  late Future<List<Map<String, dynamic>>> feedbacksFuture;
+
+  String? spaceId;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +31,10 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
       final spaceId = ModalRoute.of(context)?.settings.arguments as String?;
       if (spaceId != null) {
         _fetchSpaceData(spaceId);
+        setState(() {
+          feedbacksFuture =
+              fetchFeedbacks(spaceId); // Initialize feedbacksFuture
+        });
       } else {
         // Handle the case where the spaceId is not passed
         print('No spaceId provided');
@@ -101,6 +112,60 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchFeedbacks(String spaceId) async {
+    try {
+      // Get the feedbacks collection
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('feedbacks') // Specify the collection name
+          .where('spaceId', isEqualTo: spaceId) // Query by spaceId
+          .get();
+
+      // Extract the feedback data
+      List<Map<String, dynamic>> feedbackList = [];
+      for (var doc in querySnapshot.docs) {
+        var feedbackData = doc.data() as Map<String, dynamic>;
+
+        // Fetch user data (image and fullName) using the userId
+        String userId = feedbackData['userId'] ?? '';
+        if (userId.isNotEmpty) {
+          DocumentSnapshot userDoc = await FirebaseFirestore.instance
+              .collection('users') // Assuming you have a 'users' collection
+              .doc(userId)
+              .get();
+
+          if (userDoc.exists) {
+            var userData = userDoc.data() as Map<String, dynamic>;
+            feedbackData['image'] = userData['image'] ??
+                ''; // Assuming image URL is stored under 'imageUrl'
+            feedbackData['userName'] = userData['fullName'] ??
+                'Unknown User'; // Assuming fullName is stored under 'fullName'
+          } else {
+            feedbackData['userImage'] = ''; // Handle missing user data
+            feedbackData['userName'] = 'Unknown User';
+          }
+        }
+
+        feedbackList.add(feedbackData);
+      }
+
+      return feedbackList;
+    } catch (e) {
+      print("Error fetching feedbacks: $e");
+      return [];
+    }
+  }
+
+  DateTime convertToDateTime(dynamic timestamp) {
+    // Check if the timestamp is a Firestore Timestamp
+    if (timestamp is Timestamp) {
+      return timestamp.toDate(); // Converts the Firestore Timestamp to DateTime
+    } else if (timestamp is String) {
+      return DateTime.parse(timestamp); // If it's already a String, parse it
+    } else {
+      throw Exception('Invalid timestamp format');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +186,7 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
           }
 
           var space = snapshot.data!;
-          String spaceId = space.id;
+          spaceId = space.id;
           String spaceName = space['spaceName'] ?? 'Unknown Space';
           String description =
               space['description'] ?? 'No description available';
@@ -201,11 +266,11 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Rp. $price / Month',
+                      'Rs. $price / Hours',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                        color: Colors.green,
                       ),
                     ),
                     const Row(
@@ -280,6 +345,126 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
                         ),
                       ),
                 const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Feedbacks', // Display only one room type
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _showFeedbackDialog(context);
+                      },
+                      child: const Text(
+                        'Add feedback', // Display only one room type
+                        style: TextStyle(fontSize: 14, color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: feedbacksFuture,
+                  builder: (context, feedbackSnapshot) {
+                    if (feedbackSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (feedbackSnapshot.hasError) {
+                      return Center(
+                          child: Text('Error: ${feedbackSnapshot.error}'));
+                    }
+
+                    if (!feedbackSnapshot.hasData ||
+                        feedbackSnapshot.data!.isEmpty) {
+                      return const Text('No feedbacks available');
+                    }
+
+                    return Column(
+                      children: feedbackSnapshot.data!.map((feedback) {
+                        // Assuming 'timestamp' is a Firestore Timestamp
+                        DateTime dateTime =
+                            convertToDateTime(feedback['timestamp']);
+                        String date =
+                            "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
+
+                        final base64Image = feedback['image'];
+
+                        Uint8List? imageBytes;
+                        try {
+                          imageBytes = base64Decode(
+                              base64Image); // Decode base64 image data
+                        } catch (e) {
+                          print('Error decoding base64: $e');
+                          imageBytes = null; // Handle decoding error
+                        } // Optionally format this DateTime to a string
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundImage: imageBytes != null
+                                          ? MemoryImage(
+                                              imageBytes) // Display decoded image
+                                          : const AssetImage(
+                                                  'assets/userprofile.jpg')
+                                              as ImageProvider,
+                                      radius: 25,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          feedback['userName'] ??
+                                              'Unknown User',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          date,
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  feedback['feedback'] ??
+                                      'No comment provided.',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     // Add functionality for availability check
@@ -316,6 +501,79 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
           Text(label, style: const TextStyle(fontSize: 14)),
         ],
       ),
+    );
+  }
+
+  void _showFeedbackDialog(BuildContext context) {
+    TextEditingController feedbackController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Add Feedback"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: feedbackController,
+                decoration: const InputDecoration(
+                  hintText: "Enter your feedback here",
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 4, // Allow the user to enter multiple lines of text
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Handle feedback submission logic
+                      String feedback = feedbackController.text;
+                      if (feedback.isNotEmpty) {
+                        try {
+                          await feedbackCollection.add({
+                            'feedback': feedback,
+                            'spaceId': spaceId,
+                            'userId': FirebaseAuth.instance.currentUser!.uid,
+                            'timestamp': DateTime.now(),
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Feedback Submitted')),
+                          );
+                          Navigator.of(context).pop();
+                          _fetchSpaceData(spaceId!);
+
+                          setState(() {
+                            feedbacksFuture = fetchFeedbacks(
+                                spaceId!); // Initialize feedbacksFuture
+                          }); // Initialize feedbacksFuture
+                          // Close the dialog
+                        } catch (e) {
+                          print('Error saving feedback: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Error saving feedback')),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Please enter some feedback')),
+                        );
+                      }
+                    },
+                    // Close the dialog
+
+                    child: const Text('Submit'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

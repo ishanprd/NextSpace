@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nextspace/Model/user_model.dart';
 import 'package:nextspace/pages/Co-worker/booking_history.dart';
 import 'package:nextspace/pages/Co-worker/chat.dart';
 import 'package:nextspace/pages/Co-worker/coworker_dashboard.dart';

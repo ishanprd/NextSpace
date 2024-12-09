@@ -74,7 +74,6 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
     };
   }
 
-  // Fetching bookings for the specific space owned by the user
   Future<void> _fetchBookings() async {
     if (spaceId == null) return;
 
@@ -82,46 +81,53 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
       isLoading = true; // Start loading
     });
 
-    QuerySnapshot bookingSnapshot = await _firestore
-        .collection('bookings')
-        .where('spaceId', isEqualTo: spaceId)
-        .get();
+    try {
+      QuerySnapshot bookingSnapshot = await _firestore
+          .collection('bookings')
+          .where('spaceId', isEqualTo: spaceId)
+          .get();
 
-    List<Map<String, dynamic>> fetchedActiveRequests = [];
-    List<Map<String, dynamic>> fetchedBookingHistory = [];
-    List<Map<String, dynamic>> fetchedCancelledBookings = [];
+      List<Map<String, dynamic>> fetchedActiveRequests = [];
+      List<Map<String, dynamic>> fetchedBookingHistory = [];
+      List<Map<String, dynamic>> fetchedCancelledBookings = [];
 
-    for (var doc in bookingSnapshot.docs) {
-      var bookingData = doc.data() as Map<String, dynamic>;
-      String status = bookingData['status'] ?? '';
-      String userId = bookingData[
-          'userId']; // Get the userId of the person who made the booking
+      for (var doc in bookingSnapshot.docs) {
+        var bookingData = doc.data() as Map<String, dynamic>;
+        String status = bookingData['status'] ?? '';
+        String userId = bookingData['userId'];
 
-      // Fetch the user's name and photo based on the userId
-      bookingId = doc.id;
-      Map<String, String?> userDetails = await _getUserDetails(userId);
+        bookingId = doc.id;
+        Map<String, String?> userDetails = await _getUserDetails(userId);
 
-      // Add user details to the booking data
-      bookingData['bookingId'] = bookingId;
-      bookingData['userName'] = userDetails['userName'];
-      bookingData['userPhoto'] = userDetails['userPhoto'];
+        bookingData['bookingId'] = bookingId;
+        bookingData['userName'] = userDetails['userName'];
+        bookingData['userPhoto'] = userDetails['userPhoto'];
 
-      // Categorizing bookings based on status
-      if (status == 'Pending') {
-        fetchedActiveRequests.add(bookingData);
-      } else if (status == 'Accepted') {
-        fetchedBookingHistory.add(bookingData);
-      } else if (status == 'Cancelled') {
-        fetchedCancelledBookings.add(bookingData);
+        if (status == 'Pending') {
+          fetchedActiveRequests.add(bookingData);
+        } else if (status == 'Accepted') {
+          fetchedBookingHistory.add(bookingData);
+        } else if (status == 'Cancelled') {
+          fetchedCancelledBookings.add(bookingData);
+        }
       }
-    }
 
-    setState(() {
-      activeRequests = fetchedActiveRequests;
-      bookingHistory = fetchedBookingHistory;
-      cancelledBookings = fetchedCancelledBookings;
-      isLoading = false; // Stop loading
-    });
+      if (mounted) {
+        setState(() {
+          activeRequests = fetchedActiveRequests;
+          bookingHistory = fetchedBookingHistory;
+          cancelledBookings = fetchedCancelledBookings;
+          isLoading = false; // Stop loading
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      print("Error fetching bookings: $e");
+    }
   }
 
   // Function to handle accepting a booking request

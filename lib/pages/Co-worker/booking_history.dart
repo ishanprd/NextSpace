@@ -17,7 +17,7 @@ class _BookingHistoryState extends State<BookingHistory> {
   Widget build(BuildContext context) {
     final String userId =
         _auth.currentUser?.uid ?? ''; // Dynamically fetch userId
-    final Query _bookings = FirebaseFirestore.instance
+    final Query bookings = FirebaseFirestore.instance
         .collection('bookings')
         .where('userId', isEqualTo: userId);
 
@@ -35,7 +35,7 @@ class _BookingHistoryState extends State<BookingHistory> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: StreamBuilder<QuerySnapshot>(
-          stream: _bookings.snapshots(),
+          stream: bookings.snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

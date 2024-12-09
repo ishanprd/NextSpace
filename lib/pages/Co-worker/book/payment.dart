@@ -146,13 +146,6 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (bookingData == null) {
-      // Show a loader until bookingData is available
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     final date = bookingData['date'];
     final timeString = bookingData['hours'] ?? '0.0';
     final double time = double.tryParse(timeString) ?? 0.0; // Safely parse time

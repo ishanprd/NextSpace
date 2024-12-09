@@ -22,7 +22,7 @@ class _SignupPageState extends State<SignupPage> {
           )),
           // Overlay card with buttons
           Positioned(
-            top: 100, // Position from the top of the screen
+            top: 0, // Position from the top of the screen
             left: 0, // Align to the left edge
             right: 0, // Align to the right edge
             child: Container(
@@ -31,27 +31,10 @@ class _SignupPageState extends State<SignupPage> {
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        decoration: const BoxDecoration(
-                            color: Color.fromRGBO(223, 226, 235, 100),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                        height: 8,
-                        width: 100,
-                      )
-                    ],
-                  ),
                   const SizedBox(
                     height: 50,
                   ),
@@ -71,10 +54,10 @@ class _SignupPageState extends State<SignupPage> {
                     'A Hive to Strive',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 50),
                   Image.asset('assets/onboardingimagetwo.jpg'),
                   const SizedBox(
-                    height: 20,
+                    height: 50,
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -96,10 +79,31 @@ class _SignupPageState extends State<SignupPage> {
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/email/spaceowner');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      elevation: 3,
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 32),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Sign up as Space Owner',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/email/spaceowner');
+                        Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 3,
@@ -112,7 +116,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ),
                       child: const Text(
-                        'Sign up as Space Owner',
+                        'Back',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       )),

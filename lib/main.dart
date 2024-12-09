@@ -14,6 +14,7 @@ import 'package:nextspace/pages/admin/setting/edit_admin_profile.dart';
 import 'package:nextspace/pages/admin/setting/issues_problems.dart';
 import 'package:nextspace/pages/admin/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space_page.dart';
+import 'package:nextspace/pages/authentication/auth_handler.dart';
 import 'firebase_options.dart';
 import 'package:nextspace/pages/start_page.dart';
 import 'package:nextspace/pages/authentication/reset/reset_password.dart';
@@ -51,12 +52,12 @@ class NextSpace extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Inter' // Enable Material 3 components
           ),
-      debugShowCheckedModeBanner:
-          false, // Disable the debug banner in development
+      debugShowCheckedModeBanner: false,
+      home: AuthChecker(), // Disable the debug banner in development
 
       routes: {
         // Define named routes for navigating between pages
-        '/': (context) => const StartPage(),
+        '/start_page': (context) => const StartPage(),
         '/login': (context) => const LoginPage(), // Route for signup page
         '/signup': (context) => const SignupPage(), // Route for signup page
         '/email/coworker': (context) => const EmailPageForCoworker(),
@@ -86,6 +87,47 @@ class NextSpace extends StatelessWidget {
         '/add_details': (context) => const AddDetail(),
         '/payments': (context) => const PaymentPage(),
         '/chat': (context) => const ChatNavigation(),
+      },
+    );
+  }
+}
+
+class AuthChecker extends StatelessWidget {
+  final AuthHandler _authHandler = AuthHandler();
+
+  AuthChecker({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _authHandler.getUserRole(), // Fetch user role and login status
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasData) {
+          final role = snapshot.data!['role']; // Extract role from snapshot
+          final isLoggedIn =
+              snapshot.data!['isLoggedIn']; // Extract login status
+
+          if (isLoggedIn) {
+            switch (role) {
+              case 'coworker':
+                return const CoworkerNavigation();
+              case 'spaceOwner':
+                return const SpaceOwnerNavigation();
+              case 'admin':
+                return const AdminNavigation();
+              default:
+                return const StartPage(); // Default to start page if role is unknown
+            }
+          } else {
+            return const StartPage(); // User is not logged in
+          }
+        }
+
+        return const StartPage(); // Default case
       },
     );
   }

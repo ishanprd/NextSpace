@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
             right: 0,
             child: Column(
               children: [
-                SizedBox(height: screenHeight * 0.07), // Spacer for top margin
+                SizedBox(height: screenHeight * 0.17), // Spacer for top margin
                 // Welcome message
                 Text(
                   "Welcome Back",
@@ -129,8 +129,8 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.only(
                 left: 20.0,
                 right: 20.0,
-                top: screenHeight * 0.35, // Adjust padding for the form
-                bottom: 40.0,
+                top: screenHeight * 0.55, // Adjust padding for the form
+                bottom: 10.0,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -154,60 +154,60 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         // Google Sign-In Button
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // Add Google Sign-In Logic here
-                          },
-                          icon: Image.asset(
-                            'assets/google-logo.png', // Google logo image
-                            width: screenWidth * 0.1, // Responsive size
-                            height: screenWidth * 0.1, // Responsive size
-                          ),
-                          label: Text(
-                            "Continue with Google",
-                            style: TextStyle(
-                              fontSize:
-                                  screenWidth * 0.04, // Responsive font size
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            foregroundColor: Colors.black,
-                            backgroundColor: Colors.white, // White background
-                            minimumSize: Size(double.infinity,
-                                screenHeight * 0.07), // Full width button
-                            side: BorderSide(color: Colors.grey[300]!),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  10.0), // Rounded button corners
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: screenHeight * 0.03), // Spacer
-                        // Divider with "Or login with" text
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 100,
-                              height: 1,
-                              decoration: const BoxDecoration(
-                                color: Color.fromARGB(255, 201, 203, 203),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            const Text("Or login with"),
-                            const SizedBox(width: 10),
-                            Container(
-                              width: 100,
-                              height: 1,
-                              decoration: const BoxDecoration(
-                                color: Color.fromARGB(255, 201, 203, 203),
-                              ),
-                            ),
-                          ],
-                        ),
+                        // ElevatedButton.icon(
+                        //   onPressed: () {
+                        //     // Add Google Sign-In Logic here
+                        //   },
+                        //   icon: Image.asset(
+                        //     'assets/google-logo.png', // Google logo image
+                        //     width: screenWidth * 0.1, // Responsive size
+                        //     height: screenWidth * 0.1, // Responsive size
+                        //   ),
+                        //   label: Text(
+                        //     "Continue with Google",
+                        //     style: TextStyle(
+                        //       fontSize:
+                        //           screenWidth * 0.04, // Responsive font size
+                        //       fontWeight: FontWeight.bold,
+                        //     ),
+                        //   ),
+                        //   style: ElevatedButton.styleFrom(
+                        //     elevation: 0,
+                        //     foregroundColor: Colors.black,
+                        //     backgroundColor: Colors.white, // White background
+                        //     minimumSize: Size(double.infinity,
+                        //         screenHeight * 0.07), // Full width button
+                        //     side: BorderSide(color: Colors.grey[300]!),
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(
+                        //           10.0), // Rounded button corners
+                        //     ),
+                        //   ),
+                        // ),
+                        // SizedBox(height: screenHeight * 0.03), // Spacer
+                        // // Divider with "Or login with" text
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.center,
+                        //   children: [
+                        //     Container(
+                        //       width: 100,
+                        //       height: 1,
+                        //       decoration: const BoxDecoration(
+                        //         color: Color.fromARGB(255, 201, 203, 203),
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 10),
+                        //     const Text("Or login with"),
+                        //     const SizedBox(width: 10),
+                        //     Container(
+                        //       width: 100,
+                        //       height: 1,
+                        //       decoration: const BoxDecoration(
+                        //         color: Color.fromARGB(255, 201, 203, 203),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                         SizedBox(height: screenHeight * 0.03), // Spacer
                         // Email TextField
                         TextField(

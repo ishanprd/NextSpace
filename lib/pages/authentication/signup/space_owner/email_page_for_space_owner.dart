@@ -127,6 +127,27 @@ class _EmailPageSpaceOwnerState extends State<EmailPageSpaceOwner> {
                   ),
                 ),
               ),
+              SizedBox(height: size.height * 0.02),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // Go back to the previous page
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  minimumSize: Size(double.infinity, size.height * 0.07),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                child: Text(
+                  "Back",
+                  style: TextStyle(
+                    fontSize: size.width * 0.05,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

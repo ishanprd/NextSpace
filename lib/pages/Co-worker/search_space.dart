@@ -205,11 +205,15 @@ class _SearchSpaceState extends State<SearchSpace> {
 
                 // Book Now Button
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   onPressed: () {
                     Navigator.pushNamed(context, '/view_space_for_book',
                         arguments: space['id']);
                   },
-                  child: const Text("View Space"),
+                  child: const Text(
+                    "View Space",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),

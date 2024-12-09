@@ -13,6 +13,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = false; // Boolean variable for remember me checkbox
   bool _obscureText = true; // Boolean to toggle password visibility
+  bool _isLoading = false; // Boolean to manage loading state
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -43,6 +44,10 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     // If all validations pass, proceed with login
+    setState(() {
+      _isLoading = true; // Show the loading indicator
+    });
+
     try {
       // Call the login function from AuthService
       await authService.loginUser(
@@ -54,6 +59,10 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login failed: ${e.toString()}")),
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide the loading indicator after login attempt
+      });
     }
   }
 
@@ -129,8 +138,8 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.only(
                 left: 20.0,
                 right: 20.0,
-                top: screenHeight * 0.55, // Adjust padding for the form
-                bottom: 10.0,
+                top: screenHeight * 0.53, // Adjust padding for the form
+                bottom: 20.0,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -153,62 +162,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Column(
                       children: [
-                        // Google Sign-In Button
-                        // ElevatedButton.icon(
-                        //   onPressed: () {
-                        //     // Add Google Sign-In Logic here
-                        //   },
-                        //   icon: Image.asset(
-                        //     'assets/google-logo.png', // Google logo image
-                        //     width: screenWidth * 0.1, // Responsive size
-                        //     height: screenWidth * 0.1, // Responsive size
-                        //   ),
-                        //   label: Text(
-                        //     "Continue with Google",
-                        //     style: TextStyle(
-                        //       fontSize:
-                        //           screenWidth * 0.04, // Responsive font size
-                        //       fontWeight: FontWeight.bold,
-                        //     ),
-                        //   ),
-                        //   style: ElevatedButton.styleFrom(
-                        //     elevation: 0,
-                        //     foregroundColor: Colors.black,
-                        //     backgroundColor: Colors.white, // White background
-                        //     minimumSize: Size(double.infinity,
-                        //         screenHeight * 0.07), // Full width button
-                        //     side: BorderSide(color: Colors.grey[300]!),
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(
-                        //           10.0), // Rounded button corners
-                        //     ),
-                        //   ),
-                        // ),
-                        // SizedBox(height: screenHeight * 0.03), // Spacer
-                        // // Divider with "Or login with" text
-                        // Row(
-                        //   mainAxisAlignment: MainAxisAlignment.center,
-                        //   children: [
-                        //     Container(
-                        //       width: 100,
-                        //       height: 1,
-                        //       decoration: const BoxDecoration(
-                        //         color: Color.fromARGB(255, 201, 203, 203),
-                        //       ),
-                        //     ),
-                        //     const SizedBox(width: 10),
-                        //     const Text("Or login with"),
-                        //     const SizedBox(width: 10),
-                        //     Container(
-                        //       width: 100,
-                        //       height: 1,
-                        //       decoration: const BoxDecoration(
-                        //         color: Color.fromARGB(255, 201, 203, 203),
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        SizedBox(height: screenHeight * 0.03), // Spacer
                         // Email TextField
                         TextField(
                           controller: _emailController,
@@ -315,14 +268,18 @@ class _LoginPageState extends State<LoginPage> {
                                   10.0), // Rounded button corners
                             ),
                           ),
-                          child: Text(
-                            "Log In",
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: _isLoading
+                              ? CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : Text(
+                                  "Log In",
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                         SizedBox(height: screenHeight * 0.03), // Spacer
                         // Sign-Up Option

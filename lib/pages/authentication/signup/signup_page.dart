@@ -54,10 +54,10 @@ class _SignupPageState extends State<SignupPage> {
                     'A Hive to Strive',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 30),
                   Image.asset('assets/onboardingimagetwo.jpg'),
                   const SizedBox(
-                    height: 50,
+                    height: 30,
                   ),
                   ElevatedButton(
                     onPressed: () {

@@ -39,6 +39,7 @@ class _ChatState extends State<Chat> {
             appBar: AppBar(
               centerTitle: true,
               title: const Text("Chat"),
+              automaticallyImplyLeading: false,
             ),
             body: SafeArea(
               child: StreamBuilder<QuerySnapshot>(
@@ -100,6 +101,8 @@ class _ChatState extends State<Chat> {
                                           }
 
                                           return ListTile(
+                                            style: ListTileStyle.list,
+                                            focusColor: Colors.grey,
                                             onTap: () {
                                               Navigator.push(
                                                 context,

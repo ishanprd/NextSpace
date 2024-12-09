@@ -250,7 +250,7 @@ class _CreateSpaceState extends State<CreateSpace> {
                   labelText: "Location",
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.map),
+                    icon: const Icon(Icons.location_on),
                     onPressed: _pickLocation,
                   ),
                 ),

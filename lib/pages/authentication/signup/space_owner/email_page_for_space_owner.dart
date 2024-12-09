@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nextspace/Widget/dialog_box.dart';
 import 'package:nextspace/validation/check_email_exits.dart';
 import 'package:nextspace/validation/email_validation.dart';
 
@@ -95,13 +96,49 @@ class _EmailPageSpaceOwnerState extends State<EmailPageSpaceOwner> {
                   String email = _emailController.text;
                   bool exist = await checkEmailExists(email);
                   if (email.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please enter an email")),
+                    showDialog(
+                      // ignore: use_build_context_synchronously
+                      context: context,
+                      builder: (BuildContext context) {
+                        return DialogBox(
+                          icon: Icons.error_outline,
+                          color: Colors.red,
+                          title: "Please enter your email",
+                          onOkPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                        );
+                      },
                     );
                   } else if (!isValidEmail(email)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Please enter a valid email")),
+                    showDialog(
+                      // ignore: use_build_context_synchronously
+                      context: context,
+                      builder: (BuildContext context) {
+                        return DialogBox(
+                          icon: Icons.error_outline,
+                          color: Colors.red,
+                          title: "Please enter a valid email",
+                          onOkPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                        );
+                      },
+                    );
+                  } else if (exist) {
+                    showDialog(
+                      // ignore: use_build_context_synchronously
+                      context: context,
+                      builder: (BuildContext context) {
+                        return DialogBox(
+                          icon: Icons.error_outline,
+                          color: Colors.red,
+                          title: "email already exists !!",
+                          onOkPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                        );
+                      },
                     );
                   } else if (!exist) {
                     Navigator.pushNamed(

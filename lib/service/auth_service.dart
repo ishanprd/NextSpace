@@ -124,11 +124,11 @@ class AuthService {
 
       // Navigate to the respective dashboard based on the role
       if (role == 'coworker') {
-        Navigator.pushNamed(context, '/coworker');
+        Navigator.pushReplacementNamed(context, '/coworker');
       } else if (role == 'space_owner') {
-        Navigator.pushNamed(context, '/space_owner');
+        Navigator.pushReplacementNamed(context, '/space_owner');
       } else if (role == 'admin') {
-        Navigator.pushNamed(context, '/admin');
+        Navigator.pushReplacementNamed(context, '/admin');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Unknown role: $role")),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:nextspace/Widget/dialog_box.dart';
 import 'package:nextspace/validation/check_email_exits.dart';
 import 'package:nextspace/validation/email_validation.dart';
 
@@ -20,11 +21,24 @@ class _ResetPasswordState extends State<ResetPassword> {
         await FirebaseAuth.instance.sendPasswordResetEmail(
           email: _emailController.text.trim(),
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Password reset email sent!. check your email')),
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Password reset email sent!. check your email')),
+        // );
+        showDialog(
+          // ignore: use_build_context_synchronously
+          context: context,
+          builder: (BuildContext context) {
+            return DialogBox(
+              icon: Icons.thumb_up,
+              color: Colors.green,
+              title: "Password reset email has been sent",
+              onOkPressed: () {
+                Navigator.pushNamed(context, '/login'); // Close the dialog
+              },
+            );
+          },
         );
-        Navigator.pushNamed(context, '/login');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Given email hasn`t registered yet')),

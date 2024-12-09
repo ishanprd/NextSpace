@@ -149,7 +149,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           decoration: BoxDecoration(
                                             color: (currentMessage.sender ==
                                                     widget.userModel.uid)
-                                                ? Colors.grey
+                                                ? Colors.blue
                                                 : Theme.of(context)
                                                     .colorScheme
                                                     .secondary,

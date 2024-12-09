@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nextspace/Widget/dialog_box.dart';
 import 'package:nextspace/service/auth_service.dart';
 
 class SignupPageForCoworker extends StatefulWidget {
@@ -127,10 +128,34 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
         // Upload image to Firebase Storage if needed
         role: 'coworker', // Assuming role is coworker
       );
-      Navigator.pushReplacementNamed(context, '/login');
+      showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return DialogBox(
+            icon: Icons.login,
+            color: Colors.green,
+            title: "Login Successfully",
+            onOkPressed: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          );
+        },
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Registration failed: ${e.toString()}")),
+      showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return DialogBox(
+            icon: Icons.login,
+            color: Colors.green,
+            title: "Registration failed: ${e.toString()}",
+            onOkPressed: () {
+              Navigator.of(context).pop();
+            },
+          );
+        },
       );
     }
   }

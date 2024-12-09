@@ -588,6 +588,13 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
 
                               UserModel ownerModel = snapshot.data!;
                               return ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
                                 onPressed: () {
                                   if (OwnerId != null &&
                                       userModel.uid != OwnerId) {
@@ -609,7 +616,11 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
                                     });
                                   }
                                 },
-                                child: const Text("Contact Owner"),
+                                child: const Text(
+                                  "Contact Owner",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white),
+                                ),
                               );
                             },
                           )

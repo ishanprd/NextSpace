@@ -5,6 +5,7 @@ import 'package:esewa_flutter_sdk/esewa_config.dart';
 import 'package:esewa_flutter_sdk/esewa_flutter_sdk.dart';
 import 'package:esewa_flutter_sdk/esewa_payment.dart';
 import 'package:esewa_flutter_sdk/esewa_payment_success_result.dart';
+import 'package:nextspace/Widget/dialog_box.dart';
 import 'package:nextspace/static_value.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -87,12 +88,25 @@ class _PaymentPageState extends State<PaymentPage> {
         'status': 'success',
         'timestamp': FieldValue.serverTimestamp(), // Timestamp
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment completed successfully!')),
+      showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return DialogBox(
+            icon: Icons.payment,
+            color: Colors.green,
+            title: "Payment completed successfully",
+            onOkPressed: () {
+              Navigator.pushReplacementNamed(context, '/coworker');
+            },
+          );
+        },
       );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Payment completed successfully!')),
+      // );
 
-      Navigator.pushNamed(context, '/coworker');
+      // Navigator.pushNamed(context, '/coworker');
     } catch (e) {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +188,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Time: $time Hours',
+                  'Total: $time Hours',
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -204,10 +218,10 @@ class _PaymentPageState extends State<PaymentPage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             ListTile(
-              leading: const Icon(Icons.meeting_room, size: 40),
+              leading: const Icon(Icons.space_dashboard_rounded, size: 40),
               title: Text(spaceName),
               subtitle: Text(
-                'Total Rs ${pricePerHour.toStringAsFixed(2)}',
+                'Total Amount: Rs ${pricePerHour.toStringAsFixed(2)}',
               ),
             ),
             const Spacer(),
@@ -220,10 +234,14 @@ class _PaymentPageState extends State<PaymentPage> {
                   esewapaymentcall(spaceName, priceString);
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
                   padding: const EdgeInsets.all(16),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-                child: Text('Pay Now (Rs${pricePerHour.toStringAsFixed(2)})'),
+                child: Text(
+                  'Pay Now (Rs ${pricePerHour.toStringAsFixed(2)})',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],

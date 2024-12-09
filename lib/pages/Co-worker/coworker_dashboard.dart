@@ -194,7 +194,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
               Padding(
                 padding: const EdgeInsets.only(top: 50.0),
                 child: Text(
-                  "Hi $Name , where you\nwanna work today?",
+                  "Hi $Name , \nwhere you wanna work today?",
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -312,7 +312,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                                         _buildAmenitiesFilterChip(
                                             "Air Conditioning", modalSetState),
                                         _buildAmenitiesFilterChip(
-                                            "Projector", modalSetState),
+                                            "Desk Space", modalSetState),
                                       ],
                                     ),
                                   ],

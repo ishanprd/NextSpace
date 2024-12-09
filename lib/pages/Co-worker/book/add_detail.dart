@@ -203,12 +203,26 @@ class _AddDetailState extends State<AddDetail> {
             children: [
               const Text(
                 'Booking Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Text('Space Name: $spaceName'),
-              Text('Place: $placeName'),
-              Text('Rate: Rs ${price.toStringAsFixed(2)} per hour'),
+              Text(
+                'Space Name: $spaceName',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Place: $placeName',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Rate: Rs ${price.toStringAsFixed(2)} per hour',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: dateController,
@@ -239,9 +253,9 @@ class _AddDetailState extends State<AddDetail> {
                 readOnly: true,
                 onTap: () => _selectTime(context, false),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               const Text(
-                'Select Booking Method',
+                'Select Payment Method',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               ListTile(
@@ -265,15 +279,23 @@ class _AddDetailState extends State<AddDetail> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     onPressed: _saveBooking,
-                    child: const Text('Save'),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    child: const Text('Cancel'),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),

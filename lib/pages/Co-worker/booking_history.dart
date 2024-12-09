@@ -99,7 +99,7 @@ class _BookingHistoryState extends State<BookingHistory> {
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black,
+                                color: Colors.green,
                               ),
                             ),
                           ],

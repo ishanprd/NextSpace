@@ -39,7 +39,7 @@ class _CoWorkerSettingState extends State<CoWorkerSetting> {
             icon: Icons.notifications_outlined,
             title: 'Notifications',
             onTap: () {
-              Navigator.pushNamed(context, '/notifications');
+              Navigator.pushNamed(context, '/coworker_notifications');
             },
           ),
 
@@ -47,14 +47,11 @@ class _CoWorkerSettingState extends State<CoWorkerSetting> {
           const SectionTitle(title: 'Support & About'),
 
           SettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help & Support',
-            onTap: () {},
-          ),
-          SettingsTile(
             icon: Icons.info_outline,
             title: 'Terms and Policies',
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/terms');
+            },
           ),
 
           // Cache & Cellular Section
@@ -64,7 +61,9 @@ class _CoWorkerSettingState extends State<CoWorkerSetting> {
           SettingsTile(
             icon: Icons.report_problem_outlined,
             title: 'Report a problem',
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/report');
+            },
           ),
 
           SettingsTile(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -15,7 +16,18 @@ class SpaceFeedback extends StatefulWidget {
 class _SpaceFeedbackState extends State<SpaceFeedback> {
   // Fetch feedbacks from Firestore
   Future<List<Map<String, dynamic>>> fetchFeedbacks() async {
-    var collection = FirebaseFirestore.instance.collection('feedbacks');
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser;
+    final spacesSnapshot = await firestore
+        .collection('spaces')
+        .where('ownerId', isEqualTo: user?.uid)
+        .get();
+
+    final List<String> spaceIds =
+        spacesSnapshot.docs.map((doc) => doc.id).toList();
+    var collection = FirebaseFirestore.instance
+        .collection('feedbacks')
+        .where('spaceId', whereIn: spaceIds);
     var querySnapshot = await collection.get();
     var feedbackList = querySnapshot.docs.map((doc) {
       return doc.data();

@@ -4,6 +4,9 @@ import 'package:nextspace/navigation/admin_navigation.dart';
 import 'package:nextspace/navigation/chat_navigation.dart';
 import 'package:nextspace/pages/Co-worker/book/add_detail.dart';
 import 'package:nextspace/pages/Co-worker/book/payment.dart';
+import 'package:nextspace/pages/Co-worker/report.dart';
+import 'package:nextspace/pages/Co-worker/setting/notification.dart';
+import 'package:nextspace/pages/Co-worker/terms.dart';
 import 'package:nextspace/pages/Space%20Owner/chat/chat.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space/create_space.dart';
@@ -88,6 +91,9 @@ class NextSpace extends StatelessWidget {
         '/add_details': (context) => const AddDetail(),
         '/payments': (context) => const PaymentPage(),
         '/chat': (context) => const ChatNavigation(),
+        '/coworker_notifications': (context) => const CoworkerNotification(),
+        '/terms': (context) => const Terms(),
+        '/report': (context) => const Report(),
       },
     );
   }

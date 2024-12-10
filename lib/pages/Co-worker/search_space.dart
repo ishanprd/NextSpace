@@ -13,7 +13,6 @@ class SearchSpace extends StatefulWidget {
 }
 
 class _SearchSpaceState extends State<SearchSpace> {
-  late GoogleMapController _mapController;
   Map<String, dynamic>?
       selectedSpace; // To store details of the selected space.
   List<Map<String, dynamic>> spaces = []; // Dynamic list for spaces
@@ -84,9 +83,7 @@ class _SearchSpaceState extends State<SearchSpace> {
                         target: LatLng(27.6731, 85.3249), // Default location
                         zoom: 14,
                       ),
-                      onMapCreated: (controller) {
-                        _mapController = controller;
-                      },
+                      onMapCreated: (controller) {},
                       markers: _buildMarkers(),
                     ),
                   ),

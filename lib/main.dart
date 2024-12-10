@@ -35,7 +35,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  ); // Initialize Firebase app
+  );
+  // Initialize Firebase app
   runApp(const NextSpace()); // Run the app, passing the NextSpace widget
 }
 

@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class Booking extends StatefulWidget {
@@ -30,7 +31,8 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> cancelledBookings =
       []; // For storing cancelled bookings
 
-  bool isLoading = true; // Track loading state
+  bool isLoading = true;
+  var userId; // Track loading state
 
   @override
   void initState() {
@@ -59,6 +61,53 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
 
       spaceId = userSnapshot.id;
       _fetchBookings();
+    }
+  }
+
+  Future<void> saveFcmToken(userId) async {
+    // Get the FCM token
+    String? fcmToken = await FirebaseMessaging.instance.getToken();
+
+    DocumentSnapshot userSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (userSnapshot.data() != null && fcmToken != null) {
+      // Save the token in the 'tokens' collection
+      await FirebaseFirestore.instance
+          .collection('tokens') // New collection
+          .doc(userSnapshot.id) // Document ID is the user's UID
+          .set({
+        'userId': userSnapshot.id, // Store the user ID
+        'fcmToken': fcmToken, // Store the FCM token
+        'createdAt':
+            FieldValue.serverTimestamp(), // Optional: Track creation time
+      });
+      print('FCM Token saved successfully: $fcmToken');
+    } else {
+      print('Error: User not logged in or FCM token is null');
+    }
+  }
+
+  Future<void> sendNotification(
+      String userId, String title, String message) async {
+    try {
+      // Get a reference to the Firebase Function
+      final HttpsCallable callable =
+          FirebaseFunctions.instance.httpsCallable('sendPushNotification');
+
+      // Call the function with the parameters
+      final result = await callable.call({
+        'userId': userId,
+        'title': title,
+        'message': message,
+      });
+
+      if (result.data['success']) {
+        print("Notification sent successfully!");
+      } else {
+        print("Failed to send notification: ${result.data['error']}");
+      }
+    } catch (e) {
+      print("Error calling function: $e");
     }
   }
 
@@ -140,7 +189,24 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
               'bookings') // Replace 'bookings' with your collection name
           .doc(bookingId) // Use the document ID of the booking
           .update({'status': newStatus}); // Update the status field
+      if (newStatus == 'Accepted') {
+        // Send a notification to the user
+        var bookingSnapshot = await FirebaseFirestore.instance
+            .collection('bookings')
+            .doc(bookingId)
+            .get();
 
+        setState(() {
+          userId = bookingSnapshot['userId'];
+          saveFcmToken(userId);
+        });
+        await sendNotification(userId, 'Booking Status',
+            'Your booking request has been accepted.');
+      } else if (newStatus == 'Cancelled') {
+        // Send a notification to the user
+        await sendNotification(userId, 'Booking Status',
+            'Your booking request has been Cancelled.');
+      }
       // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Booking status updated to $newStatus")),

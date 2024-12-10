@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:nextspace/pages/admin/delete_user.dart';
 
 class ViewUsers extends StatefulWidget {
   const ViewUsers({super.key});
@@ -64,6 +65,7 @@ class _ViewUsersState extends State<ViewUsers>
 
         spaceOwners = spaceOwnersSnapshot.docs.map((doc) {
           return {
+            'uid': doc.id,
             'userName': doc['fullName'],
             'userPhoto': doc['image'] ?? 'assets/userprofile.jpg',
             'role': doc['role'],
@@ -146,27 +148,37 @@ class _ViewUsersState extends State<ViewUsers>
                   }
                 }
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: imageBytes != null
-                          ? MemoryImage(imageBytes) // Display decoded image
-                          : const AssetImage('assets/userprofile.jpg')
-                              as ImageProvider,
-                      radius: 25,
-                    ),
-                    title: Text(
-                      user["userName"],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Role: ${user['role']}"),
-                        Text("Email: ${user['email']}"),
-                        Text("Phone: ${user['phone']}"),
-                      ],
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DeleteUser(userId: user['uid']),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: imageBytes != null
+                            ? MemoryImage(imageBytes) // Display decoded image
+                            : const AssetImage('assets/userprofile.jpg')
+                                as ImageProvider,
+                        radius: 25,
+                      ),
+                      title: Text(
+                        user["userName"],
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Role: ${user['role']}"),
+                          Text("Email: ${user['email']}"),
+                          Text("Phone: ${user['phone']}"),
+                        ],
+                      ),
                     ),
                   ),
                 );

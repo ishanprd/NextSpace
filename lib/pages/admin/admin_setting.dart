@@ -36,13 +36,6 @@ class _AdminSettingState extends State<AdminSetting> {
           ),
 
           SettingsTile(
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            onTap: () {
-              Navigator.pushNamed(context, '/admin_notifications');
-            },
-          ),
-          SettingsTile(
             icon: Icons.feedback_outlined,
             title: 'Issues and problems',
             onTap: () {
@@ -56,7 +49,9 @@ class _AdminSettingState extends State<AdminSetting> {
           SettingsTile(
             icon: Icons.info_outline,
             title: 'Terms and Policies',
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/terms');
+            },
           ),
           const SectionTitle(title: 'Actions'),
 

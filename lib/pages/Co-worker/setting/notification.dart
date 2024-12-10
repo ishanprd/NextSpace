@@ -77,14 +77,7 @@ class _CoworkerNotificationState extends State<CoworkerNotification> {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            Icon(
-                              notification['type'] == 'success'
-                                  ? Icons.check_circle
-                                  : Icons.error,
-                              color: notification['type'] == 'success'
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
+                            const Icon(Icons.check_circle, color: Colors.green),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(

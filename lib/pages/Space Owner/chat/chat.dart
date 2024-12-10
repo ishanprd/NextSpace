@@ -39,6 +39,8 @@ class _ChatState extends State<Chat> {
             appBar: AppBar(
               centerTitle: true,
               title: const Text("Chat"),
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.blue,
             ),
             body: SafeArea(
               child: StreamBuilder<QuerySnapshot>(

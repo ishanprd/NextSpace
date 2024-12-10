@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,7 +16,63 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
   int bookingCount = 0;
   int feedbackCount = 0;
   double revenue = 0.0;
-  bool isLoading = true; // Track loading state
+  bool isLoading = true;
+  Uint8List? imageBytes;
+  // Track loading state
+  Future<List<Map<String, dynamic>>> fetchTransactions(
+      List<String> spaceIds) async {
+    try {
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Step 1: Fetch bookings with successful payments for the given spaceIds
+      final bookingsSnapshot = await firestore
+          .collection('bookings')
+          .where('spaceId', whereIn: spaceIds)
+          .where('paymentStatus', isEqualTo: 'Success')
+          .get();
+
+      // Step 2: Collect user IDs from bookings
+      final List<Map<String, dynamic>> transactions = [];
+      final Set<String> userIds =
+          bookingsSnapshot.docs.map((doc) => doc['userId'] as String).toSet();
+
+      // Step 3: Fetch user details for the collected user IDs
+      for (final userId in userIds) {
+        final userDoc = await firestore.collection('users').doc(userId).get();
+        final userData = userDoc.data();
+
+        if (userData != null) {
+          // Match bookings with user data
+          bookingsSnapshot.docs.forEach((bookingDoc) {
+            if (bookingDoc['userId'] == userId) {
+              Uint8List? imageBytes;
+
+              // Decode base64 image if available
+              try {
+                final base64Image = userData['image'] ?? '';
+                if (base64Image.isNotEmpty) {
+                  imageBytes = base64Decode(base64Image);
+                }
+              } catch (e) {
+                print('Error decoding base64 image: $e');
+              }
+
+              transactions.add({
+                'name': userData['fullName'],
+                'photo': imageBytes, // Store the decoded image bytes
+                'price': bookingDoc['price'],
+                'date': bookingDoc['date'],
+              });
+            } // Set
+          });
+        }
+      }
+      return transactions;
+    } catch (e) {
+      print("Error fetching transactions: $e");
+      return [];
+    }
+  }
 
   @override
   void initState() {
@@ -69,6 +128,12 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
           },
         );
       });
+      final transactions = await fetchTransactions(spaceIds);
+      setState(() {
+        transactionList =
+            transactions; // Store fetched transactions for rendering
+        isLoading = false;
+      });
 
       // Step 3: Fetch feedback count
       final feedbackSnapshot = await firestore
@@ -123,13 +188,17 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
                         value: "$bookingCount",
                         increment: "Updated",
                         color: Colors.blue,
+                        icon: Icons
+                            .event_available, // Calendar or event icon for bookings
                       ),
                       const SizedBox(width: 10),
                       _buildStatCard(
                         title: "Revenue",
-                        value: "Rs $revenue",
+                        value: "$revenue",
                         increment: "Updated",
                         color: Colors.pink,
+                        icon: Icons
+                            .currency_rupee_sharp, // Money icon for revenue
                       ),
                     ],
                   ),
@@ -141,9 +210,11 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
                         value: "$feedbackCount",
                         increment: "Updated",
                         color: Colors.red,
+                        icon: Icons.feedback, // Feedback or comment icon
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 20),
                   const Text(
                     "Transactions",
@@ -162,6 +233,7 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
     required String value,
     required String increment,
     required Color color,
+    required IconData icon, // Add an icon parameter
   }) {
     return Expanded(
       child: Container(
@@ -170,28 +242,41 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            // Icon
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.2),
+              child: Icon(icon, color: color),
             ),
-            const SizedBox(height: 5),
-            Text(
-              title,
-              style: TextStyle(color: color, fontSize: 14),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              increment,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
+            const SizedBox(width: 10),
+            // Text Section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    title,
+                    style: TextStyle(color: color, fontSize: 14),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    increment,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -200,99 +285,40 @@ class _SpaceOwnerDashboardState extends State<SpaceOwnerDashboard> {
     );
   }
 
-  Widget _buildTransactionList() {
-    // Sample dynamic data (you can replace this with actual data)
-    List<Map<String, String>> transactions = [
-      {
-        "name": "Product Design Handbook",
-        "price": "\$30.00",
-        "purchases": "88 purchases",
-        "color": "green",
-      },
-      {
-        "name": "Website UI Kit",
-        "price": "\$8.00",
-        "purchases": "68 purchases",
-        "color": "blue",
-      },
-      {
-        "name": "Icon UI Kit",
-        "price": "\$8.00",
-        "purchases": "53 purchases",
-        "color": "orange",
-      },
-      {
-        "name": "E-commerce Web Template",
-        "price": "\$10.00",
-        "purchases": "48 purchases",
-        "color": "purple",
-      },
-      {
-        "name": "Wireframing Kit",
-        "price": "\$8.00",
-        "purchases": "51 purchases",
-        "color": "red",
-      },
-    ];
+  List<Map<String, dynamic>> transactionList = [];
 
+  Widget _buildTransactionList() {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: transactions.length,
+      itemCount: transactionList.length,
       itemBuilder: (context, index) {
-        final transaction = transactions[index];
-        Color itemColor;
-        switch (transaction["color"]) {
-          case "green":
-            itemColor = Colors.green;
-            break;
-          case "blue":
-            itemColor = Colors.blue;
-            break;
-          case "orange":
-            itemColor = Colors.orange;
-            break;
-          case "purple":
-            itemColor = Colors.purple;
-            break;
-          case "red":
-            itemColor = Colors.red;
-            break;
-          default:
-            itemColor = Colors.grey;
-        }
-        return _ProductTile(
-          name: transaction["name"]!,
-          price: transaction["price"]!,
-          purchases: transaction["purchases"]!,
-          color: itemColor,
+        final transaction = transactionList[index];
+        return ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          leading: CircleAvatar(
+            backgroundImage: transaction['photo'] != null
+                ? MemoryImage(transaction['photo'])
+                : const AssetImage('assets/applogo.png') as ImageProvider,
+            radius: 24,
+          ),
+          title: Text(
+            transaction['name'] ?? 'Unknown',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            transaction['date']?.toString() ?? 'No date',
+            style: const TextStyle(color: Colors.grey),
+          ),
+          trailing: Text(
+            "Rs ${transaction['price'] ?? '0.00'}",
+            style: const TextStyle(
+              color: Colors.green,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         );
       },
-    );
-  }
-}
-
-class _ProductTile extends StatelessWidget {
-  final String name;
-  final String price;
-  final String purchases;
-  final Color color;
-
-  const _ProductTile({
-    required this.name,
-    required this.price,
-    required this.purchases,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.2),
-        child: Icon(Icons.shopping_bag, color: color),
-      ),
-      title: Text(name),
-      subtitle: Text("$price · $purchases"),
     );
   }
 }

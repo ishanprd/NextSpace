@@ -213,7 +213,7 @@ class _EditProfileState extends State<EditProfile> {
                   radius: 50,
                   backgroundImage: imageBytes != null
                       ? MemoryImage(imageBytes!) // Display decoded image
-                      : const AssetImage('assets/userprofile.jpg')
+                      : const AssetImage('assets/applogo.png')
                           as ImageProvider, // Replace with your asset
                 ), // Replace with your asset
                 CircleAvatar(

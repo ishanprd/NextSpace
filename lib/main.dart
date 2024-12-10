@@ -8,14 +8,15 @@ import 'package:nextspace/pages/Co-worker/report.dart';
 import 'package:nextspace/pages/Co-worker/setting/notification.dart';
 import 'package:nextspace/pages/Co-worker/terms.dart';
 import 'package:nextspace/pages/Space%20Owner/chat/chat.dart';
+import 'package:nextspace/pages/Space%20Owner/report.dart';
 import 'package:nextspace/pages/Space%20Owner/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space/create_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space/edit_space.dart';
 import 'package:nextspace/pages/Space%20Owner/space/view_space.dart';
 import 'package:nextspace/pages/Co-worker/book/view_space_for_book.dart';
+import 'package:nextspace/pages/admin/delete_user.dart';
 import 'package:nextspace/pages/admin/setting/edit_admin_profile.dart';
 import 'package:nextspace/pages/admin/setting/issues_problems.dart';
-import 'package:nextspace/pages/admin/setting/notification.dart';
 import 'package:nextspace/pages/Space%20Owner/space_page.dart';
 import 'package:nextspace/pages/authentication/auth_handler.dart';
 import 'firebase_options.dart';
@@ -84,7 +85,7 @@ class NextSpace extends StatelessWidget {
         '/admin': (context) => const AdminNavigation(),
         '/edit_admin_profile': (context) => const EditAdminProfile(),
         '/issues': (context) => const IssuesProblems(),
-        '/admin_notifications': (context) => const AdminNotification(),
+
         '/space_page': (context) => const SpacePage(),
         '/edit_space': (context) => const EditSpace(),
         '/view_space_for_book': (context) => const ViewSpaceForBook(),
@@ -94,6 +95,7 @@ class NextSpace extends StatelessWidget {
         '/coworker_notifications': (context) => const CoworkerNotification(),
         '/terms': (context) => const Terms(),
         '/report': (context) => const Report(),
+        '/space_report': (context) => const SpaceReport(),
       },
     );
   }

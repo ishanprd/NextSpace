@@ -54,14 +54,11 @@ class _SpaceSettingState extends State<SpaceSetting> {
           const SectionTitle(title: 'Support & About'),
 
           SettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help & Support',
-            onTap: () {},
-          ),
-          SettingsTile(
             icon: Icons.info_outline,
             title: 'Terms and Policies',
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/terms');
+            },
           ),
 
           // Cache & Cellular Section
@@ -71,7 +68,10 @@ class _SpaceSettingState extends State<SpaceSetting> {
           SettingsTile(
             icon: Icons.report_problem_outlined,
             title: 'Report a problem',
-            onTap: () {},
+            onTap: () {
+              // TODO: Implement report problem functionality
+              Navigator.pushNamed(context, '/space_report');
+            },
           ),
 
           SettingsTile(

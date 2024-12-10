@@ -15,6 +15,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   int bookedCount = 0;
   int feedbackCount = 0;
   int revenueCount = 0;
+  bool isLoading = true; // To track the loading state
 
   @override
   void initState() {
@@ -25,6 +26,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
   // Fetch data from Firestore
   Future<void> _fetchOverviewData() async {
     try {
+      setState(() {
+        isLoading = true;
+      });
+
       // Fetch user count
       QuerySnapshot userSnapshot =
           await FirebaseFirestore.instance.collection('users').get();
@@ -34,27 +39,25 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
       // Fetch booked count (replace with actual collection)
       QuerySnapshot bookedSnapshot =
-          await FirebaseFirestore.instance.collection('bookings').get();
+          await FirebaseFirestore.instance.collection('reports').get();
       setState(() {
         bookedCount = bookedSnapshot.docs.length;
       });
 
       // Fetch feedback count (replace with actual collection)
       QuerySnapshot feedbackSnapshot =
-          await FirebaseFirestore.instance.collection('feedback').get();
+          await FirebaseFirestore.instance.collection('spaces').get();
       setState(() {
         feedbackCount = feedbackSnapshot.docs.length;
       });
 
       // Fetch revenue (this could be from a 'revenue' collection or calculated differently)
-      QuerySnapshot revenueSnapshot =
-          await FirebaseFirestore.instance.collection('transactions').get();
-      setState(() {
-        revenueCount = revenueSnapshot.docs.fold<int>(
-            0, (previousValue, doc) => previousValue + (doc['amount'] as int));
-      });
     } catch (e) {
       print("Error fetching overview data: $e");
+    } finally {
+      setState(() {
+        isLoading = false; // Stop showing the loading spinner
+      });
     }
   }
 
@@ -73,82 +76,93 @@ class _AdminDashboardState extends State<AdminDashboard> {
         foregroundColor: Colors.black,
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Overview",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildStatCard(
-                    title: "Users",
-                    value: "$usersCount",
-                    increment: "100↑", // You can update this to dynamic data
-                    color: Colors.purple,
-                  ),
-                  const SizedBox(width: 10),
-                  _buildStatCard(
-                    title: "Booked",
-                    value: "$bookedCount",
-                    increment: "10k↑",
-                    color: Colors.blue,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildStatCard(
-                    title: "Feedback",
-                    value: "$feedbackCount",
-                    increment: "5↓",
-                    color: Colors.red,
-                  ),
-                  const SizedBox(width: 10),
-                  _buildStatCard(
-                    title: "Revenue",
-                    value: "\$$revenueCount", // Dynamically display revenue
-                    increment: "50k↑",
-                    color: Colors.pink,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Pie Charts",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              const AspectRatio(
-                aspectRatio: 1.5,
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: PieChartWidget(),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator()) // Show loading spinner
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Overview",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _buildStatCard(
+                          title: "Users",
+                          value: "$usersCount",
+                          color: Colors.purple,
+                        ),
+                        const SizedBox(width: 10),
+                        _buildStatCard(
+                          title: "Spaces",
+                          value: "$bookedCount",
+                          color: Colors.blue,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _buildStatCard(
+                          title: "Report and Problems",
+                          value: "$feedbackCount",
+                          color: Colors.red,
+                        ),
+                        const SizedBox(width: 10),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Pie Charts",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: PieChartWidget(
+                          usersCount: usersCount,
+                          spacesCount: bookedCount,
+                          issuesCount: feedbackCount,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Bar Charts",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: BarChartWidget(
+                          usersCount: usersCount,
+                          spacesCount: bookedCount,
+                          issuesCount: feedbackCount,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Text(
-                "Transactions",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              _buildTransactionList(),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
   Widget _buildStatCard({
     required String title,
     required String value,
-    required String increment,
     required Color color,
   }) {
     return Expanded(
@@ -175,159 +189,136 @@ class _AdminDashboardState extends State<AdminDashboard> {
               style: TextStyle(color: color, fontSize: 14),
             ),
             const SizedBox(height: 5),
-            Text(
-              increment,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-              ),
-            ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildTransactionList() {
-    // Sample dynamic data (you can replace this with actual data)
-    List<Map<String, String>> transactions = [
-      {
-        "name": "Product Design Handbook",
-        "price": "\$30.00",
-        "purchases": "88 purchases",
-        "color": "green",
-      },
-      {
-        "name": "Website UI Kit",
-        "price": "\$8.00",
-        "purchases": "68 purchases",
-        "color": "blue",
-      },
-      {
-        "name": "Icon UI Kit",
-        "price": "\$8.00",
-        "purchases": "53 purchases",
-        "color": "orange",
-      },
-      {
-        "name": "E-commerce Web Template",
-        "price": "\$10.00",
-        "purchases": "48 purchases",
-        "color": "purple",
-      },
-      {
-        "name": "Wireframing Kit",
-        "price": "\$8.00",
-        "purchases": "51 purchases",
-        "color": "red",
-      },
-    ];
-
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: transactions.length,
-      itemBuilder: (context, index) {
-        final transaction = transactions[index];
-        Color itemColor;
-        switch (transaction["color"]) {
-          case "green":
-            itemColor = Colors.green;
-            break;
-          case "blue":
-            itemColor = Colors.blue;
-            break;
-          case "orange":
-            itemColor = Colors.orange;
-            break;
-          case "purple":
-            itemColor = Colors.purple;
-            break;
-          case "red":
-            itemColor = Colors.red;
-            break;
-          default:
-            itemColor = Colors.grey;
-        }
-        return _ProductTile(
-          name: transaction["name"]!,
-          price: transaction["price"]!,
-          purchases: transaction["purchases"]!,
-          color: itemColor,
-        );
-      },
-    );
-  }
 }
 
-class _ProductTile extends StatelessWidget {
-  final String name;
-  final String price;
-  final String purchases;
-  final Color color;
+class PieChartWidget extends StatelessWidget {
+  final int usersCount;
+  final int spacesCount;
+  final int issuesCount;
 
-  const _ProductTile({
-    required this.name,
-    required this.price,
-    required this.purchases,
-    required this.color,
+  const PieChartWidget({
+    super.key,
+    required this.usersCount,
+    required this.spacesCount,
+    required this.issuesCount,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.2),
-        child: Icon(Icons.shopping_bag, color: color),
-      ),
-      title: Text(name),
-      subtitle: Text("$price · $purchases"),
-    );
-  }
-}
+    final int total = usersCount + spacesCount + issuesCount;
 
-class PieChartWidget extends StatelessWidget {
-  const PieChartWidget({super.key});
+    // Calculate percentages
+    final double usersPercentage = (usersCount / total) * 100;
+    final double spacesPercentage = (spacesCount / total) * 100;
+    final double issuesPercentage = (issuesCount / total) * 100;
 
-  @override
-  Widget build(BuildContext context) {
     return PieChart(
       PieChartData(
         sectionsSpace: 2,
         centerSpaceRadius: 40,
         sections: [
           PieChartSectionData(
-            value: 40,
+            value: usersPercentage,
             color: Colors.blue,
-            title: 'Users\n40%',
+            title: 'Users\n${usersPercentage.toStringAsFixed(1)}%',
             radius: 60,
             titleStyle: const TextStyle(
                 fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           PieChartSectionData(
-            value: 30,
+            value: issuesPercentage,
             color: Colors.red,
-            title: 'Issue\n30%',
+            title: 'Issues\n${issuesPercentage.toStringAsFixed(1)}%',
             radius: 60,
             titleStyle: const TextStyle(
                 fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           PieChartSectionData(
-            value: 20,
+            value: spacesPercentage,
             color: Colors.green,
-            title: 'Revenue\n20%',
+            title: 'Spaces\n${spacesPercentage.toStringAsFixed(1)}%',
             radius: 60,
             titleStyle: const TextStyle(
                 fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          PieChartSectionData(
-            value: 10,
-            color: Colors.yellow,
-            title: 'Spaces\n10%',
-            radius: 60,
-            titleStyle: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class BarChartWidget extends StatelessWidget {
+  final int usersCount;
+  final int spacesCount;
+  final int issuesCount;
+
+  const BarChartWidget({
+    super.key,
+    required this.usersCount,
+    required this.spacesCount,
+    required this.issuesCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Prepare the data for the bar chart
+    final barData = [
+      BarChartGroupData(
+        x: 0,
+        barsSpace: 4,
+        barRods: [
+          BarChartRodData(
+            toY: usersCount.toDouble(),
+            color: Colors.blue,
+            width: 20,
+            borderRadius: BorderRadius.zero,
+          ),
+        ],
+      ),
+      BarChartGroupData(
+        x: 1,
+        barsSpace: 4,
+        barRods: [
+          BarChartRodData(
+            toY: issuesCount.toDouble(),
+            color: Colors.red,
+            width: 20,
+            borderRadius: BorderRadius.zero,
+          ),
+        ],
+      ),
+      BarChartGroupData(
+        x: 2,
+        barsSpace: 4,
+        barRods: [
+          BarChartRodData(
+            toY: spacesCount.toDouble(),
+            color: Colors.green,
+            width: 20,
+            borderRadius: BorderRadius.zero,
+          ),
+        ],
+      ),
+    ];
+
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceBetween,
+        titlesData: FlTitlesData(show: true),
+        borderData: FlBorderData(show: true),
+        gridData: FlGridData(show: false),
+        barGroups: barData,
+        minY: 0,
+        maxY: (usersCount > spacesCount && usersCount > issuesCount)
+            ? usersCount.toDouble()
+            : (spacesCount > issuesCount)
+                ? spacesCount.toDouble()
+                : issuesCount.toDouble(),
       ),
     );
   }

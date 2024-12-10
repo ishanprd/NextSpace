@@ -7,10 +7,12 @@ class Booking {
   final String city;
   final String spaceId;
   final String userId;
+  final String paymentStatus;
   final String paymentType;
   final DateTime date;
   final String hours;
   final String status;
+  final String transactionId;
   final Timestamp? createdAt;
 
   Booking({
@@ -20,10 +22,12 @@ class Booking {
     required this.city,
     required this.spaceId,
     required this.userId,
+    required this.paymentStatus,
     required this.paymentType,
     required this.date,
     required this.hours,
     required this.status,
+    required this.transactionId,
     this.createdAt,
   });
 
@@ -37,10 +41,12 @@ class Booking {
       city: data['city'],
       spaceId: data['spaceId'],
       userId: data['userId'],
+      paymentStatus: data['paymentStatus'],
       paymentType: data['paymentType'],
       date: DateTime.parse(data['date']),
       hours: data['hours'],
       status: data['status'],
+      transactionId: data['transactionId'],
       createdAt: data['createdAt'],
     );
   }
@@ -54,9 +60,11 @@ class Booking {
       'spaceId': spaceId,
       'userId': userId,
       'paymentType': paymentType,
+      'paymentStatus': paymentStatus,
       'date': date.toIso8601String(),
       'hours': hours,
       'status': status,
+      'transactionId': transactionId,
       'createdAt': createdAt,
     };
   }

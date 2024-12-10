@@ -6,7 +6,7 @@ class UserModel {
   final String password;
   final String gender;
   final String imageUrl;
-  final Null photo;
+  final String? photo;
   final String role;
 
   UserModel({
@@ -17,7 +17,7 @@ class UserModel {
     required this.password,
     required this.gender,
     required this.imageUrl,
-    required this.photo,
+    this.photo,
     required this.role,
   });
 

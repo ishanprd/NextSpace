@@ -14,7 +14,7 @@ class CoworkerDashboard extends StatefulWidget {
 
 class _CoworkerDashboardState extends State<CoworkerDashboard> {
   final TextEditingController _searchController = TextEditingController();
-  double _selectedPriceRange = 500.0; // Default price range
+  double _selectedPriceRange = 5000.0; // Default price range
   String? _selectedRoomType;
   String? Name; // Changed to List<String>
   final List<String> _selectedAmenities =
@@ -23,6 +23,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
   String SpaceId = ' ';
 
   Uint8List? imageBytes;
+  List<Map<String, dynamic>> _spaces = [];
   final picker = ImagePicker();
 
   @override
@@ -90,6 +91,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
       // print('Fetched spaces: $spaces');
 
       setState(() {
+        _spaces = spaces;
         _filteredSpaces = spaces;
       });
     } catch (e) {
@@ -100,38 +102,27 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
   // Apply filters
   void _applyFilters() {
     setState(() {
-      // Re-fetch or reset the filtered spaces before applying the filter
-      _filteredSpaces = _filteredSpaces.where((space) {
-        // Search filter
+      _filteredSpaces = _spaces.where((space) {
         final matchesName = _searchController.text.isEmpty ||
             space['name']
                 .toLowerCase()
                 .contains(_searchController.text.toLowerCase());
 
-        // Price range filter
         final matchesPrice =
-            _selectedPriceRange == 0 || space['price'] <= _selectedPriceRange;
+            _selectedPriceRange == 0 || space['price'] == _selectedPriceRange;
 
-        // Room type filter
-        final roomType = space['type'];
         final matchesRoomType =
-            _selectedRoomType == null || _selectedRoomType == roomType;
+            _selectedRoomType == null || _selectedRoomType == space['type'];
 
-        // Amenities filter
-        final amenities = space['features'];
         final matchesAmenities = _selectedAmenities.isEmpty ||
-            _selectedAmenities.every((amenity) => amenities.contains(amenity));
+            _selectedAmenities
+                .every((amenity) => space['features'].contains(amenity));
 
         return matchesName &&
             matchesPrice &&
             matchesRoomType &&
             matchesAmenities;
       }).toList();
-
-      // Log if no spaces match the filter
-      if (_filteredSpaces.isEmpty) {
-        print('No spaces found matching the filters.');
-      }
     });
   }
 
@@ -269,6 +260,8 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                                         modalSetState(() {
                                           _selectedPriceRange = value;
                                         });
+                                        // Update the main widget state
+
                                         // Use setState to propagate filter changes to the main widget
                                         _applyFilters();
                                       },

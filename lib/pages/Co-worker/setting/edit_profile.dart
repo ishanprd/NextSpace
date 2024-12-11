@@ -241,28 +241,6 @@ class _EditProfileState extends State<EditProfile> {
             ),
             const SizedBox(height: 16),
 
-            // Email field
-            // TextField(
-            //   controller: _emailController,
-            //   keyboardType: TextInputType.emailAddress,
-            //   decoration: const InputDecoration(
-            //     labelText: "Email",
-            //     border: OutlineInputBorder(),
-            //   ),
-            // ),
-            // const SizedBox(height: 16),
-
-            // // Password field
-            // TextField(
-            //   controller: _passwordController,
-            //   obscureText: true,
-            //   decoration: const InputDecoration(
-            //     labelText: "Password",
-            //     border: OutlineInputBorder(),
-            //   ),
-            // ),
-            // const SizedBox(height: 16),
-
             // Phone number field
             TextField(
               controller: _phoneController,

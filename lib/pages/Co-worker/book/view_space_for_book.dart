@@ -635,66 +635,92 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
     );
   }
 
+// This widget builds a row with an icon and a label
   Widget _buildFacilityIcon(IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 8.0, vertical: 4.0), // Adds padding around the row
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue, size: 24),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 14)),
+          Icon(
+            // Display the icon passed as argument
+            icon,
+            color: Colors.blue, // Set the color of the icon
+            size: 24, // Set the size of the icon
+          ),
+          const SizedBox(
+              width: 8), // Add spacing between the icon and the label
+          Text(
+            label, // Display the label text
+            style: const TextStyle(
+                fontSize: 14), // Style the label with a font size of 14
+          ),
         ],
       ),
     );
   }
 
+  // This function displays a dialog for the user to submit feedback
   void _showFeedbackDialog(BuildContext context) {
+    // Create a controller to manage the text input in the feedback field
     TextEditingController feedbackController = TextEditingController();
 
+    // Show a dialog box to add feedback
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Add Feedback"),
+          title: const Text("Add Feedback"), // Title of the dialog box
           content: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize:
+                MainAxisSize.min, // Ensures dialog content size is minimal
             children: [
+              // A text field for entering feedback
               TextField(
-                controller: feedbackController,
+                controller:
+                    feedbackController, // Connect the controller to the text field
                 decoration: const InputDecoration(
-                  hintText: "Enter your feedback here",
-                  border: OutlineInputBorder(),
+                  hintText: "Enter your feedback here", // Placeholder text
+                  border: OutlineInputBorder(), // Add border to the text field
                 ),
                 maxLines: 4, // Allow the user to enter multiple lines of text
               ),
-              const SizedBox(height: 16),
+              const SizedBox(
+                  height: 16), // Add space between the text field and button
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment:
+                    MainAxisAlignment.end, // Align the button to the right
                 children: [
+                  // Submit button to submit the feedback
                   ElevatedButton(
                     onPressed: () async {
                       // Handle feedback submission logic
                       String feedback = feedbackController.text;
                       if (feedback.isNotEmpty) {
                         try {
+                          // Save the feedback to Firestore
                           await feedbackCollection.add({
-                            'feedback': feedback,
-                            'spaceId': spaceId,
-                            'userId': FirebaseAuth.instance.currentUser!.uid,
-                            'timestamp': DateTime.now(),
+                            'feedback': feedback, // Store the feedback text
+                            'spaceId': spaceId, // Store the space ID
+                            'userId': FirebaseAuth.instance.currentUser!
+                                .uid, // Store the current user's ID
+                            'timestamp':
+                                DateTime.now(), // Store the current timestamp
                           });
+                          // Show success message after submission
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Feedback Submitted')),
                           );
-                          Navigator.of(context).pop();
-                          _fetchSpaceData(spaceId!);
+                          Navigator.of(context).pop(); // Close the dialog
+                          _fetchSpaceData(
+                              spaceId!); // Refresh space data after feedback submission
 
                           setState(() {
                             feedbacksFuture = fetchFeedbacks(
-                                spaceId!); // Initialize feedbacksFuture
-                          }); // Initialize feedbacksFuture
-                          // Close the dialog
+                                spaceId!); // Update the feedbacks future
+                          });
                         } catch (e) {
+                          // Show error message if saving feedback fails
                           print('Error saving feedback: $e');
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -702,15 +728,14 @@ class _ViewSpaceForBookState extends State<ViewSpaceForBook> {
                           );
                         }
                       } else {
+                        // Show message if feedback field is empty
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content: Text('Please enter some feedback')),
                         );
                       }
                     },
-                    // Close the dialog
-
-                    child: const Text('Submit'),
+                    child: const Text('Submit'), // Submit button text
                   ),
                 ],
               ),

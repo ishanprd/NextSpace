@@ -309,9 +309,9 @@ class BarChartWidget extends StatelessWidget {
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceBetween,
-        titlesData: FlTitlesData(show: true),
+        titlesData: const FlTitlesData(show: true),
         borderData: FlBorderData(show: true),
-        gridData: FlGridData(show: false),
+        gridData: const FlGridData(show: false),
         barGroups: barData,
         minY: 0,
         maxY: (usersCount > spacesCount && usersCount > issuesCount)

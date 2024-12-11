@@ -36,6 +36,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this); // 3 tabs
+    //fetch the user data
     _getUserData();
   }
 
@@ -44,6 +45,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
     _tabController.dispose();
     super.dispose();
   }
+  //functions for get users
 
   Future<void> _getUserData() async {
     User? currentUser = _auth.currentUser;
@@ -61,6 +63,8 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
       _fetchBookings();
     }
   }
+
+  ///function to send notifications
 
   Future<void> sendNotification(
       String userId, String title, String message) async {
@@ -101,63 +105,79 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
     };
   }
 
+//fetch the booking data
   Future<void> _fetchBookings() async {
-    if (spaceId == null) return;
+    if (spaceId == null)
+      return; // Return early if spaceId is null, no need to fetch bookings.
 
     setState(() {
-      isLoading = true; // Start loading
+      isLoading =
+          true; // Set loading state to true, indicating the data is being fetched.
     });
 
     try {
+      // Fetch bookings from Firestore where 'spaceId' matches the current spaceId.
       QuerySnapshot bookingSnapshot = await _firestore
           .collection('bookings')
           .where('spaceId', isEqualTo: spaceId)
           .get();
 
+      // Initialize lists to store bookings based on their status.
       List<Map<String, dynamic>> fetchedActiveRequests = [];
       List<Map<String, dynamic>> fetchedBookingHistory = [];
       List<Map<String, dynamic>> fetchedCancelledBookings = [];
 
+      // Loop through each booking document in the snapshot.
       for (var doc in bookingSnapshot.docs) {
         var bookingData = doc.data() as Map<String, dynamic>;
-        String status = bookingData['status'] ?? '';
-        String userId = bookingData['userId'];
+        String status = bookingData['status'] ?? ''; // Get the booking status.
+        String userId = bookingData[
+            'userId']; // Get the user ID associated with the booking.
 
-        bookingId = doc.id;
-        Map<String, String?> userDetails = await _getUserDetails(userId);
+        bookingId = doc.id; // Store the booking document ID.
+        Map<String, String?> userDetails =
+            await _getUserDetails(userId); // Fetch user details.
 
+        // Add user details to the booking data.
         bookingData['bookingId'] = bookingId;
         bookingData['userName'] = userDetails['userName'];
         bookingData['userPhoto'] = userDetails['userPhoto'];
 
+        // Categorize the booking based on its status.
         if (status == 'Pending') {
-          fetchedActiveRequests.add(bookingData);
+          fetchedActiveRequests.add(
+              bookingData); // Add to active requests if status is 'Pending'.
         } else if (status == 'Accepted') {
-          fetchedBookingHistory.add(bookingData);
+          fetchedBookingHistory.add(
+              bookingData); // Add to booking history if status is 'Accepted'.
         } else if (status == 'Cancelled') {
-          fetchedCancelledBookings.add(bookingData);
+          fetchedCancelledBookings.add(
+              bookingData); // Add to cancelled bookings if status is 'Cancelled'.
         }
       }
 
+      // Update state if the widget is still mounted (to prevent memory leaks).
       if (mounted) {
         setState(() {
-          activeRequests = fetchedActiveRequests;
-          bookingHistory = fetchedBookingHistory;
-          cancelledBookings = fetchedCancelledBookings;
-          isLoading = false; // Stop loading
+          activeRequests =
+              fetchedActiveRequests; // Update the list of active requests.
+          bookingHistory = fetchedBookingHistory; // Update the booking history.
+          cancelledBookings =
+              fetchedCancelledBookings; // Update the list of cancelled bookings.
+          isLoading = false; // Stop the loading state as data has been fetched.
         });
       }
     } catch (e) {
+      // Handle any errors that occur during the data fetching.
       if (mounted) {
         setState(() {
-          isLoading = false;
+          isLoading = false; // Stop the loading state if an error occurs.
         });
       }
-      print("Error fetching bookings: $e");
+      print(
+          "Error fetching bookings: $e"); // Print the error for debugging purposes.
     }
   }
-
-  // Function to handle accepting a booking request
 
 // Function to handle accepting a booking request
   Future<void> updateBookingStatus(String bookingId, String newStatus) async {

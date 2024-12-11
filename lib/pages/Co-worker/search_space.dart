@@ -15,39 +15,44 @@ class SearchSpace extends StatefulWidget {
 class _SearchSpaceState extends State<SearchSpace> {
   Map<String, dynamic>?
       selectedSpace; // To store details of the selected space.
-  List<Map<String, dynamic>> spaces = []; // Dynamic list for spaces
-  bool isLoading = true;
-  Uint8List? imageBytes;
+  List<Map<String, dynamic>> spaces =
+      []; // Dynamic list to hold the spaces data
+  bool isLoading = true; // State to track loading status
+  Uint8List? imageBytes; // Store decoded image data (if available)
 
   @override
   void initState() {
     super.initState();
-    _fetchSpaces(); // Fetch spaces from Firebase
+    _fetchSpaces(); // Fetch space data from Firebase when the page initializes
   }
 
-  // Fetch spaces from Firebase
+  // Function to fetch spaces from Firestore
   Future<void> _fetchSpaces() async {
     try {
+      // Query Firestore collection 'spaces'
       final QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection('spaces').get();
+      // Map the fetched documents into a list of space data
       final fetchedSpaces = snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return {
-          'id': doc.id,
-          'name': data['spaceName'],
-          'description': data['description'],
-          'price': 'Rs. ${data['hoursPrice']} / Hour',
-          'rating': '4.5', // You can modify if ratings exist in Firebase
-          'latitude': double.parse(data['location'].split(',')[0]),
-          'longitude': double.parse(data['location'].split(',')[1]),
-          'image': data['imagePath'], // Ensure this is a valid image URL
-          'amenities': data['selectedAmenities'],
+          'id': doc.id, // Space document ID
+          'name': data['spaceName'], // Space name
+          'description': data['description'], // Space description
+          'price': 'Rs. ${data['hoursPrice']} / Hour', // Space price per hour
+          'rating': '4.5', // Example rating, can be dynamic based on data
+          'latitude': double.parse(
+              data['location'].split(',')[0]), // Latitude from location string
+          'longitude': double.parse(
+              data['location'].split(',')[1]), // Longitude from location string
+          'image': data['imagePath'], // Image path (base64 or URL)
+          'amenities': data['selectedAmenities'], // Selected amenities
         };
       }).toList();
 
       setState(() {
-        spaces = fetchedSpaces;
-        isLoading = false;
+        spaces = fetchedSpaces; // Update the state with the fetched spaces
+        isLoading = false; // Set loading state to false after data is fetched
       });
     } catch (e) {
       // Handle errors (e.g., connection issues)
@@ -67,30 +72,34 @@ class _SearchSpaceState extends State<SearchSpace> {
             style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
           ),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false, // Disable back button in the app bar
       ),
       body: isLoading
           ? const Center(
-              child: CircularProgressIndicator()) // Show loading spinner
+              child:
+                  CircularProgressIndicator()) // Show loading spinner while fetching data
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  // Google Map
+                  // Google Map displaying the spaces' locations
                   SizedBox(
-                    height: 300, // Fixed height for Google Map
+                    height: 300, // Fixed height for the Google Map widget
                     child: GoogleMap(
                       initialCameraPosition: const CameraPosition(
-                        target: LatLng(27.6731, 85.3249), // Default location
-                        zoom: 14,
+                        target:
+                            LatLng(27.6731, 85.3249), // Default map location
+                        zoom: 14, // Zoom level
                       ),
-                      onMapCreated: (controller) {},
-                      markers: _buildMarkers(),
+                      onMapCreated:
+                          (controller) {}, // Placeholder for any actions on map creation
+                      markers:
+                          _buildMarkers(), // Set the markers for spaces on the map
                     ),
                   ),
 
-                  // Space Details Section
+                  // Space Details Section (only visible if a space is selected)
                   if (selectedSpace != null)
-                    _buildSpaceDetails(selectedSpace!)
+                    _buildSpaceDetails(selectedSpace!) // Display space details
                   else
                     const Padding(
                       padding: EdgeInsets.all(16.0),
@@ -104,36 +113,41 @@ class _SearchSpaceState extends State<SearchSpace> {
     );
   }
 
-  // Build markers for Google Map
+  // Function to build markers for Google Map based on the fetched spaces
   Set<Marker> _buildMarkers() {
     return spaces.map((space) {
-      final base64Image = space['image'];
+      final base64Image = space['image']; // Get base64 image for the space
 
+      // Decode the base64 image string into bytes
       if (base64Image.isNotEmpty) {
         try {
           imageBytes = base64Decode(base64Image); // Decode base64 image data
         } catch (e) {
-          print('Error decoding base64: $e');
-          imageBytes = null; // Handle decoding error
+          print('Error decoding base64: $e'); // Handle decoding errors
+          imageBytes = null; // If error occurs, set imageBytes to null
         }
-      } //
+      }
+
+      // Return a marker for the space on the map
       return Marker(
-        markerId: MarkerId(space['id']),
-        position: LatLng(space['latitude'], space['longitude']),
+        markerId: MarkerId(space['id']), // Unique marker ID
+        position: LatLng(
+            space['latitude'], space['longitude']), // Marker position on map
         infoWindow: InfoWindow(
-          title: space['name'],
-          snippet: space['price'],
+          title: space['name'], // Marker info window title (space name)
+          snippet: space['price'], // Marker info window snippet (price)
         ),
         onTap: () {
           setState(() {
-            selectedSpace = space; // Update selected space details
+            selectedSpace =
+                space; // Update selected space when marker is tapped
           });
         },
       );
-    }).toSet();
+    }).toSet(); // Return a set of markers
   }
 
-  // Build space details UI
+  // Function to build space details UI when a space is selected
   Widget _buildSpaceDetails(Map<String, dynamic> space) {
     return Card(
       margin: const EdgeInsets.all(16.0),
@@ -144,20 +158,20 @@ class _SearchSpaceState extends State<SearchSpace> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Section
+          // Image Section (display either decoded image or fallback to asset image)
           ClipRRect(
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(16),
             ),
             child: imageBytes != null
                 ? Image.memory(
-                    imageBytes!, // Use MemoryImage to display byte data
+                    imageBytes!, // Display decoded base64 image
                     fit: BoxFit.cover,
                     height: 200,
                     width: double.infinity,
                   )
                 : Image.asset(
-                    'assets/userprofile.jpg', // Fallback to an asset image
+                    'assets/userprofile.jpg', // Fallback image if no base64 data
                     fit: BoxFit.cover,
                     height: 200,
                     width: double.infinity,
@@ -168,7 +182,7 @@ class _SearchSpaceState extends State<SearchSpace> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name
+                // Space name
                 Text(
                   space['name'],
                   style: const TextStyle(
@@ -178,11 +192,11 @@ class _SearchSpaceState extends State<SearchSpace> {
                 ),
                 const SizedBox(height: 8),
 
-                // Description
+                // Space description
                 Text(space['description']),
                 const SizedBox(height: 8),
 
-                // Price
+                // Space price
                 Text(
                   space['price'],
                   style: const TextStyle(
@@ -193,19 +207,20 @@ class _SearchSpaceState extends State<SearchSpace> {
                 ),
                 const SizedBox(height: 8),
 
-                // Amenities
+                // Space amenities
                 Text(
-                  "Amenities: ${space['amenities'].join(', ')}",
+                  "Amenities: ${space['amenities'].join(', ')}", // List amenities
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
 
-                // Book Now Button
+                // Button to view space
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   onPressed: () {
                     Navigator.pushNamed(context, '/view_space_for_book',
-                        arguments: space['id']);
+                        arguments: space[
+                            'id']); // Navigate to booking page with space ID
                   },
                   child: const Text(
                     "View Space",

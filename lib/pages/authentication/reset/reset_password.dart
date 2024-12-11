@@ -21,10 +21,7 @@ class _ResetPasswordState extends State<ResetPassword> {
         await FirebaseAuth.instance.sendPasswordResetEmail(
           email: _emailController.text.trim(),
         );
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //       content: Text('Password reset email sent!. check your email')),
-        // );
+
         showDialog(
           // ignore: use_build_context_synchronously
           context: context,

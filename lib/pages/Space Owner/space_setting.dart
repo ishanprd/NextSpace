@@ -69,7 +69,7 @@ class _SpaceSettingState extends State<SpaceSetting> {
             icon: Icons.report_problem_outlined,
             title: 'Report a problem',
             onTap: () {
-              // TODO: Implement report problem functionality
+              //navigate to space report page
               Navigator.pushNamed(context, '/space_report');
             },
           ),

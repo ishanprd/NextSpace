@@ -57,6 +57,7 @@ class _SpacePageState extends State<SpacePage> {
                 ),
               ),
               onPressed: () {
+                //Navigate to create space
                 Navigator.pushNamed(context, '/create_space');
               },
               child: const Text(

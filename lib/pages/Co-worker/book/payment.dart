@@ -1,3 +1,4 @@
+// Import necessary packages
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:esewa_flutter_sdk/esewa_payment_success_result.dart';
 import 'package:nextspace/Widget/dialog_box.dart';
 import 'package:nextspace/static_value.dart';
 
+// StatefulWidget for the payment page
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
 
@@ -23,8 +25,8 @@ class _PaymentPageState extends State<PaymentPage> {
     super.initState();
     // Fetching booking data after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final arguments =
-          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final arguments = ModalRoute.of(context)?.settings.arguments
+          as Map<String, dynamic>?; // Fetch arguments passed to the page
       if (arguments != null) {
         setState(() {
           bookingData = arguments;
@@ -41,6 +43,7 @@ class _PaymentPageState extends State<PaymentPage> {
     });
   }
 
+  // Function to save booking data after successful payment
   Future<void> _saveBooking(EsewaPaymentSuccessResult paymentData) async {
     try {
       final booking = {
@@ -58,7 +61,9 @@ class _PaymentPageState extends State<PaymentPage> {
         'createdAt': bookingData['createdAt'],
       };
 
-      await FirebaseFirestore.instance.collection('bookings').add(booking);
+      await FirebaseFirestore.instance
+          .collection('bookings')
+          .add(booking); // Save the booking data to Firestore
     } catch (e) {
       print('Error saving booking: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -68,13 +73,15 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
 
+  // Function to handle successful payment completion
   Future<void> _payment_complete(EsewaPaymentSuccessResult paymentData) async {
     try {
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => const Center(
-          child: CircularProgressIndicator(),
+          child:
+              CircularProgressIndicator(), // Show loading indicator while saving
         ),
       );
 
@@ -89,7 +96,6 @@ class _PaymentPageState extends State<PaymentPage> {
         'timestamp': FieldValue.serverTimestamp(), // Timestamp
       });
       showDialog(
-        // ignore: use_build_context_synchronously
         context: context,
         builder: (BuildContext context) {
           return DialogBox(
@@ -97,24 +103,21 @@ class _PaymentPageState extends State<PaymentPage> {
             color: Colors.green,
             title: "Payment completed successfully",
             onOkPressed: () {
-              Navigator.pushReplacementNamed(context, '/coworker');
+              Navigator.pushReplacementNamed(context,
+                  '/coworker'); // Navigate to coworker page after success
             },
           );
         },
       );
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(content: Text('Payment completed successfully!')),
-      // );
-
-      // Navigator.pushNamed(context, '/coworker');
     } catch (e) {
-      // Handle errors
+      // Handle payment failure
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Payment failed: $e')),
       );
     }
   }
 
+  // Function to generate a random string for product ID
   String generateRandomString(int length) {
     const characters =
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -127,8 +130,10 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
+  // Function to initiate the Esewa payment process
   void esewapaymentcall(String spaceName, String price) {
     try {
+      // Initialize payment with Esewa SDK
       EsewaFlutterSdk.initPayment(
         esewaConfig: EsewaConfig(
           environment: Environment.test,
@@ -136,15 +141,15 @@ class _PaymentPageState extends State<PaymentPage> {
           secretId: StaticValue.SECRET_KEY,
         ),
         esewaPayment: EsewaPayment(
-          productId: generateRandomString(30),
+          productId: generateRandomString(30), // Generate unique product ID
           productName: 'Kumud Space',
           productPrice: price,
           callbackUrl: '',
         ),
         onPaymentSuccess: (EsewaPaymentSuccessResult data) {
           debugPrint(":::SUCCESS::: => $data");
-          _payment_complete(data);
-          _saveBooking(data);
+          _payment_complete(data); // Handle successful payment
+          _saveBooking(data); // Save booking data
         },
         onPaymentFailure: (data) {
           debugPrint(":::FAILURE::: => $data");
@@ -171,14 +176,14 @@ class _PaymentPageState extends State<PaymentPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Secure Payment'),
+        title: const Text('Secure Payment'), // Title for the page
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Date & Time
+            // Display date and time details
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -196,7 +201,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             const SizedBox(height: 20),
 
-            // Payment Method
+            // Payment Method section
             const Text(
               'Payment',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -212,7 +217,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             const Divider(),
 
-            // Space Details
+            // Space details section
             const Text(
               'Space Details',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -221,17 +226,18 @@ class _PaymentPageState extends State<PaymentPage> {
               leading: const Icon(Icons.space_dashboard_rounded, size: 40),
               title: Text(spaceName),
               subtitle: Text(
-                'Total Amount: Rs ${pricePerHour.toStringAsFixed(2)}',
+                'Total Amount: Rs ${pricePerHour.toStringAsFixed(2)}', // Display the total amount
               ),
             ),
             const Spacer(),
 
-            // Pay Now Button
+            // Pay Now button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  esewapaymentcall(spaceName, priceString);
+                  esewapaymentcall(
+                      spaceName, priceString); // Call payment function
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
@@ -240,7 +246,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 child: Text(
                   'Pay Now (Rs ${pricePerHour.toStringAsFixed(2)})',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                      color: Colors.white), // Display total amount on button
                 ),
               ),
             ),

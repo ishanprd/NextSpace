@@ -1,9 +1,9 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'dart:convert'; // For base64 encoding/decoding.
+import 'dart:typed_data'; // For handling byte data.
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firebase Firestore database.
+import 'package:firebase_auth/firebase_auth.dart'; // For Firebase authentication.
+import 'package:flutter/material.dart'; // For Flutter UI components.
+import 'package:image_picker/image_picker.dart'; // For image picking functionality.
 
 class CoworkerDashboard extends StatefulWidget {
   const CoworkerDashboard({super.key});
@@ -13,50 +13,49 @@ class CoworkerDashboard extends StatefulWidget {
 }
 
 class _CoworkerDashboardState extends State<CoworkerDashboard> {
-  final TextEditingController _searchController = TextEditingController();
-  double _selectedPriceRange = 5000.0; // Default price range
-  String? _selectedRoomType;
-  String? Name; // Changed to List<String>
+  final TextEditingController _searchController =
+      TextEditingController(); // Controller for search input.
+  double _selectedPriceRange = 5000.0; // Default price range.
+  String? _selectedRoomType; // The room type selected for filtering.
+  String? Name; // Variable to store user's name.
   final List<String> _selectedAmenities =
-      []; // Added to hold selected amenities
-  List<Map<String, dynamic>> _filteredSpaces = [];
-  String SpaceId = ' ';
+      []; // List of selected amenities for filtering.
+  List<Map<String, dynamic>> _filteredSpaces =
+      []; // List of spaces after applying filters.
+  String SpaceId = ' '; // Placeholder for space ID (could be used later).
 
-  Uint8List? imageBytes;
-  List<Map<String, dynamic>> _spaces = [];
-  final picker = ImagePicker();
+  Uint8List? imageBytes; // For holding the decoded image bytes.
+  List<Map<String, dynamic>> _spaces =
+      []; // List of spaces fetched from Firestore.
+  final picker =
+      ImagePicker(); // Instance for picking images (not used in the current code).
 
   @override
   void initState() {
     super.initState();
-    // Fetch data from Firestore on init
-    _fetchSpaces();
-    _fetchUserName();
+    _fetchSpaces(); // Fetch coworking spaces on init.
+    _fetchUserName(); // Fetch current user's name.
   }
 
+  // Fetch the current signed-in user's name from Firestore.
   Future<void> _fetchUserName() async {
     try {
-      // Get the current signed-in user
-      final User? user = FirebaseAuth.instance.currentUser;
+      final User? user =
+          FirebaseAuth.instance.currentUser; // Get the current signed-in user.
 
       if (user != null) {
-        // Fetch the user document from Firestore using the user's UID
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('users') // Assuming you have a 'users' collection
+            .collection('users') // Fetch user document from Firestore.
             .doc(user.uid)
             .get();
 
         if (userDoc.exists) {
-          // Get the user data from the document as a Map
-          var userData = userDoc.data() as Map<String, dynamic>;
-
-          // Assign the fullName field from Firestore to the Name variable
+          var userData =
+              userDoc.data() as Map<String, dynamic>; // Extract user data.
           setState(() {
-            Name = userData['fullName'];
+            Name = userData[
+                'fullName']; // Assign the full name to the Name variable.
           });
-
-          ''; // Default to an empty string if not found
-          // Optional: Print user's name for debugging
         } else {
           print("User document doesn't exist in Firestore.");
         }
@@ -64,42 +63,43 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
         print("No user is currently signed in.");
       }
     } catch (e) {
-      print('Error fetching user name: $e');
+      print(
+          'Error fetching user name: $e'); // Handle error while fetching user data.
     }
   }
 
-  // Fetch spaces from Firestore
+  // Fetch spaces from Firestore with "Accepted" status.
   Future<void> _fetchSpaces() async {
     try {
       final QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('spaces')
-          .where('status', isEqualTo: 'Accepted')
+          .collection('spaces') // Fetch spaces from Firestore.
+          .where('status', isEqualTo: 'Accepted') // Only fetch accepted spaces.
           .get();
 
       final List<Map<String, dynamic>> spaces = snapshot.docs
           .map((doc) => {
-                'id': doc.id,
-                'name': doc['spaceName'],
-                'image': doc['imagePath'],
-                'features': List<String>.from(doc['selectedAmenities']),
-                'price': double.tryParse(doc['hoursPrice'].toString()) ?? 0.0,
-                'type': doc['roomType'], // Ensure roomType is correctly handled
+                'id': doc.id, // Space ID.
+                'name': doc['spaceName'], // Space name.
+                'image': doc['imagePath'], // Image path (URL or base64).
+                'features': List<String>.from(
+                    doc['selectedAmenities']), // Amenities list.
+                'price': double.tryParse(doc['hoursPrice'].toString()) ??
+                    0.0, // Space price.
+                'type': doc['roomType'], // Room type.
               })
           .toList();
 
-      // Print the fetched spaces to check the data
-      // print('Fetched spaces: $spaces');
-
       setState(() {
-        _spaces = spaces;
-        _filteredSpaces = spaces;
+        _spaces = spaces; // Store all spaces.
+        _filteredSpaces = spaces; // Initially, no filter, show all spaces.
       });
     } catch (e) {
-      print('Error fetching coworking spaces: $e');
+      print(
+          'Error fetching coworking spaces: $e'); // Handle error in fetching spaces.
     }
   }
 
-  // Apply filters
+  // Apply the selected filters on spaces.
   void _applyFilters() {
     setState(() {
       _filteredSpaces = _spaces.where((space) {
@@ -126,31 +126,29 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
     });
   }
 
-  // Build Room Type Filter Chip
+  // Build the Room Type filter chip for selection.
   Widget _buildRoomTypeFilterChip(String label, StateSetter modalSetState) {
     final isSelected =
-        _selectedRoomType == label; // Check if the label is the selected one
+        _selectedRoomType == label; // Check if the label is selected.
     return FilterChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (selected) {
         modalSetState(() {
           if (selected) {
-            // Set the selected room type and ensure no other room type is selected
-            _selectedRoomType = label;
+            _selectedRoomType = label; // Select room type.
           } else {
-            // Deselect the room type
-            _selectedRoomType = null;
+            _selectedRoomType = null; // Deselect room type.
           }
         });
-        _applyFilters(); // Update the main widget state
+        _applyFilters(); // Apply filter after selection.
       },
       selectedColor: Colors.blue.shade100,
       checkmarkColor: Colors.blue,
     );
   }
 
-  // Build Amenities Filter Chip
+  // Build the Amenities filter chip for selection.
   Widget _buildAmenitiesFilterChip(String label, StateSetter modalSetState) {
     final isSelected = _selectedAmenities.contains(label);
     return FilterChip(
@@ -159,12 +157,12 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
       onSelected: (selected) {
         modalSetState(() {
           if (selected) {
-            _selectedAmenities.add(label);
+            _selectedAmenities.add(label); // Add to selected amenities.
           } else {
-            _selectedAmenities.remove(label);
+            _selectedAmenities.remove(label); // Remove from selected amenities.
           }
         });
-        _applyFilters(); // Update the main widget state
+        _applyFilters(); // Apply filter after selection.
       },
       selectedColor: Colors.green.shade100,
       checkmarkColor: Colors.green,
@@ -222,7 +220,6 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                           ),
                         ),
                         builder: (BuildContext context) {
-                          // Use StatefulBuilder to manage modal's internal state
                           return StatefulBuilder(
                             builder: (BuildContext context,
                                 StateSetter modalSetState) {
@@ -251,18 +248,14 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                                     Slider(
                                       value: _selectedPriceRange,
                                       min: 0,
-                                      max: 10000, // Adjust as needed
+                                      max: 10000,
                                       divisions: 100,
                                       label:
                                           'Rs. ${_selectedPriceRange.toInt()}',
                                       onChanged: (value) {
-                                        // Use modalSetState for the modal-specific update
                                         modalSetState(() {
                                           _selectedPriceRange = value;
                                         });
-                                        // Update the main widget state
-
-                                        // Use setState to propagate filter changes to the main widget
                                         _applyFilters();
                                       },
                                     ),
@@ -333,10 +326,10 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                 if (base64Image.isNotEmpty) {
                   try {
                     imageBytes =
-                        base64Decode(base64Image); // Decode base64 image data
+                        base64Decode(base64Image); // Decode base64 image.
                   } catch (e) {
                     print('Error decoding base64: $e');
-                    imageBytes = null; // Set imageBytes to null on error
+                    imageBytes = null; // Handle error if base64 decode fails.
                   }
                 }
 
@@ -346,7 +339,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                   space['name'],
                   space['price'],
                   space['type'],
-                  space['features'], // Pass amenities here
+                  space['features'], // Pass amenities here.
                   imageBytes,
                 );
               }),
@@ -357,6 +350,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
     );
   }
 
+  // Build the space card for each coworking space.
   Widget _buildSpaceCard(
     BuildContext context,
     String id,
@@ -414,7 +408,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
               ),
               const SizedBox(height: 8),
 
-              // Subtitle
+              // Subtitle (Amenities)
               Row(
                 children: amenities.map((amenity) {
                   return Text(
@@ -440,23 +434,6 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
                       color: Colors.green,
                     ),
                   ),
-                  // const Row(
-                  //   children: [
-                  //     Icon(
-                  //       Icons.star,
-                  //       color: Colors.amber,
-                  //       size: 18,
-                  //     ),
-                  //     SizedBox(width: 4),
-                  //     // Text(
-                  //     //   rating,
-                  //     //   style: const TextStyle(
-                  //     //     fontSize: 14,
-                  //     //     fontWeight: FontWeight.bold,
-                  //     //   ),
-                  //     // ),
-                  //   ],
-                  // ),
                 ],
               ),
             ],

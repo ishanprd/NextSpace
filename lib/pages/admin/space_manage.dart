@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -34,6 +33,33 @@ class _SpaceManageState extends State<SpaceManage>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> sendNotification(
+      String userId, String title, String message) async {
+    try {
+      // Add notification details to Firestore
+      final notificationData = {
+        'userId': userId,
+        'title': title,
+        'body': message,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance
+          .collection('notifications')
+          .add(notificationData);
+
+      print("Notification added to Firestore successfully!");
+
+      if (notificationData.isNotEmpty) {
+        print("Notification sent successfully!");
+      } else {
+        print("Failed to send notification");
+      }
+    } catch (e) {
+      print("Error calling function: $e");
+    }
   }
 
   // Fetch spaces and owners from Firestore based on their status
@@ -135,7 +161,7 @@ class _SpaceManageState extends State<SpaceManage>
           .collection('spaces') // Replace 'spaces' with your collection name
           .doc(spaceId) // Use the document ID of the space
           .update({'status': newStatus}); // Update the status field
-
+      sendNotification(spaceId, 'Space Status', 'Booking has been $newStatus');
       // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Space status updated to $newStatus")),

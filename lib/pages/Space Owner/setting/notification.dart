@@ -12,6 +12,7 @@ class SpaceNotification extends StatefulWidget {
 class _SpaceNotificationState extends State<SpaceNotification> {
   late Stream<QuerySnapshot>? _notificationsStream;
   String? userId;
+  String? spaceId;
 
   @override
   void initState() {
@@ -20,21 +21,46 @@ class _SpaceNotificationState extends State<SpaceNotification> {
   }
 
   Future<void> _initializeNotifications() async {
-    // Wait for the FirebaseAuth instance to initialize
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      // Get the current user ID
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      setState(() {
+      if (user != null) {
         userId = user.uid;
-        _notificationsStream = FirebaseFirestore.instance
-            .collection('notifications')
-            .where('userId', isEqualTo: userId)
-            .orderBy('createdAt', descending: true)
-            .snapshots();
-      });
-    } else {
+
+        // Query the spaces collection to find a space matching the current userId
+        final spacesQuery = await FirebaseFirestore.instance
+            .collection('spaces') // Replace with your spaces collection name
+            .where('ownerId', isEqualTo: userId) // Match userId in spaces
+            .limit(1)
+            .get();
+
+        if (spacesQuery.docs.isNotEmpty) {
+          final spaceDoc = spacesQuery.docs.first;
+          spaceId = spaceDoc.id; // Retrieve the space ID
+
+          // Fetch notifications related to the space ID
+          setState(() {
+            _notificationsStream = FirebaseFirestore.instance
+                .collection('notifications')
+                .where('userId', isEqualTo: spaceId)
+                .orderBy('createdAt', descending: true)
+                .snapshots();
+          });
+        } else {
+          setState(() {
+            _notificationsStream = null; // No space found for the user
+          });
+        }
+      } else {
+        setState(() {
+          _notificationsStream = null; // No user logged in
+        });
+      }
+    } catch (e) {
+      print("Error initializing notifications: $e");
       setState(() {
-        _notificationsStream = null; // No user logged in
+        _notificationsStream = null;
       });
     }
   }
@@ -46,7 +72,8 @@ class _SpaceNotificationState extends State<SpaceNotification> {
         title: const Text("Notifications"),
       ),
       body: _notificationsStream == null
-          ? const Center(child: Text("No user logged in."))
+          ? const Center(
+              child: Text("No user logged in or no notifications available."))
           : StreamBuilder<QuerySnapshot>(
               stream: _notificationsStream,
               builder: (context, snapshot) {

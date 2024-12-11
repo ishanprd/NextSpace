@@ -55,6 +55,7 @@ class _ViewUsersState extends State<ViewUsers>
       setState(() {
         coWorkers = coWorkersSnapshot.docs.map((doc) {
           return {
+            'uid': doc.id, // Add UID
             'userName': doc['fullName'],
             'userPhoto': doc['image'] ?? 'assets/userprofile.jpg',
             'role': doc['role'],
@@ -65,7 +66,7 @@ class _ViewUsersState extends State<ViewUsers>
 
         spaceOwners = spaceOwnersSnapshot.docs.map((doc) {
           return {
-            'uid': doc.id,
+            'uid': doc.id, // Add UID
             'userName': doc['fullName'],
             'userPhoto': doc['image'] ?? 'assets/userprofile.jpg',
             'role': doc['role'],
@@ -153,7 +154,9 @@ class _ViewUsersState extends State<ViewUsers>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DeleteUser(userId: user['uid']),
+                        builder: (context) => DeleteUser(
+                          userId: user['uid'],
+                        ),
                       ),
                     );
                   },
@@ -162,7 +165,7 @@ class _ViewUsersState extends State<ViewUsers>
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundImage: imageBytes != null
-                            ? MemoryImage(imageBytes) // Display decoded image
+                            ? MemoryImage(imageBytes)
                             : const AssetImage('assets/userprofile.jpg')
                                 as ImageProvider,
                         radius: 25,

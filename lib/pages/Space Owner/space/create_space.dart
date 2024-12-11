@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ class _CreateSpaceState extends State<CreateSpace> {
   File? _image;
 
   String _base64Image = "";
+  final picker = ImagePicker();
+  Uint8List? imageBytes;
 
   String ownerId = FirebaseAuth.instance.currentUser?.uid ?? "default_owner_id";
 
@@ -55,15 +58,19 @@ class _CreateSpaceState extends State<CreateSpace> {
 
   // Function to pick an image
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? pickedImage2 =
+    final XFile? pickedImage =
         await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage2 != null) {
-      final bytes = await pickedImage2.readAsBytes();
+    if (pickedImage != null) {
+      final bytes = await pickedImage.readAsBytes();
+
+      // Update the state with the original image
       setState(() {
-        _image = File(pickedImage2.path);
-        _base64Image = base64Encode(bytes); // Get the image file path
+        _image = File(pickedImage.path);
+        _base64Image = base64Encode(bytes);
+        imageBytes = bytes; // Display the original image
       });
+    } else {
+      setState(() {}); // Handle case when no image is picked
     }
   }
 

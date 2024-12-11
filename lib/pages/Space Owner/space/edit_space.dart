@@ -146,28 +146,20 @@ class _EditSpaceState extends State<EditSpace> {
     _fetchSpaceData(); // Fetch space data on initialization
   }
 
-  Future<void> uploadimage() async {
+  Future<void> uploadImage() async {
     final XFile? pickedImage =
         await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       final bytes = await pickedImage.readAsBytes();
-      final image = img.decodeImage(Uint8List.fromList(bytes));
-      if (image != null) {
-        // Resize image (example: 800px wide, maintaining aspect ratio)
-        final resizedImage = img.copyResize(image, width: 800);
 
-        // Convert resized image to bytes
-        final resizedBytes = Uint8List.fromList(img.encodeJpg(resizedImage));
-
-        // Update the state with the compressed image
-        setState(() {
-          _image = File(pickedImage.path);
-          _base64Image = base64Encode(resizedBytes);
-          imageBytes = resizedBytes; // Display the compressed image
-        });
-      }
+      // Update the state with the original image
+      setState(() {
+        _image = File(pickedImage.path);
+        _base64Image = base64Encode(bytes);
+        imageBytes = bytes; // Display the original image
+      });
     } else {
-      setState(() {});
+      setState(() {}); // Handle case when no image is picked
     }
   }
 
@@ -215,7 +207,7 @@ class _EditSpaceState extends State<EditSpace> {
           await docRef.update({
             'spaceName': _spaceController.text,
             'description': _descriptionController.text,
-            'monthlyPrice': _priceController.text,
+            'hoursPrice': _priceController.text,
             'city': _cityController.text,
             'location': _location,
             'imagePath': _base64Image,
@@ -227,7 +219,7 @@ class _EditSpaceState extends State<EditSpace> {
             const SnackBar(content: Text("Space data updated successfully")),
           );
           await _fetchSpaceData();
-          Navigator.pop(context);
+          Navigator.of(context).pop();
 
           // Navigate back after saving
         } else {
@@ -397,7 +389,7 @@ class _EditSpaceState extends State<EditSpace> {
                     _buildRoomTypeSelection(),
                     const SizedBox(height: 20),
                     OutlinedButton.icon(
-                      onPressed: uploadimage,
+                      onPressed: uploadImage,
                       icon: const Icon(Icons.add_a_photo_outlined,
                           color: Colors.black),
                       label: const Text('Image'),

@@ -7,7 +7,8 @@ import 'package:flutter/services.dart';
 import 'constants.dart';
 
 class EsewaFlutterSdk {
-  static const MethodChannel _channel = MethodChannel(METHOD_CHANNEL_NAME);
+  static const MethodChannel _channel =
+      const MethodChannel(METHOD_CHANNEL_NAME);
 
   static void showToast(String message) {
     _channel.invokeMethod('showToast', {"message": message});
@@ -20,7 +21,8 @@ class EsewaFlutterSdk {
     required Function onPaymentFailure,
     required Function onPaymentCancellation,
   }) {
-    _channel.invokeMethod('initPayment', _buildArgs(esewaConfig, esewaPayment));
+    _channel.invokeMethod(
+        'initPayment', _buildArgs(esewaConfig, esewaPayment));
     _channel.setMethodCallHandler((call) async {
       switch (call.method) {
         case PAYMENT_METHOD_SUCCESS:
@@ -31,8 +33,7 @@ class EsewaFlutterSdk {
           } else {
             result = json.decode(call.arguments);
           }
-          final EsewaPaymentSuccessResult paymentResult =
-              EsewaPaymentSuccessResult(
+          final EsewaPaymentSuccessResult paymentResult = EsewaPaymentSuccessResult(
             productId: result["productID"] ?? result["productId"],
             productName: result["productName"],
             totalAmount: result["totalAmount"],

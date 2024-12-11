@@ -14,36 +14,29 @@ class SignupPageForCoworker extends StatefulWidget {
 }
 
 class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
-  // Focus nodes for managing text field focus
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _phoneFocusNode = FocusNode();
   final FocusNode _addressFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  // Controllers for text fields
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Variables to store base64 encoded images
   String _base64Image1 = "";
   String _base64Image2 = "";
 
-  // AuthService instance for registration
   AuthService authService = AuthService();
 
-  // Default gender selection
-  String? _selectedGender = "Male";
+  String? _selectedGender = "Male"; // Move this outside the build method
 
-  // Variables to store the images
   File? _image1;
   File? _image2;
   final picker = ImagePicker();
   String error = '';
   String? email;
 
-  // Method to handle the citizenship image upload
   Future uploadCitizenship() async {
     final XFile? pickedImage2 =
         await picker.pickImage(source: ImageSource.gallery);
@@ -51,7 +44,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
       final bytes = await pickedImage2.readAsBytes();
       setState(() {
         _image2 = File(pickedImage2.path);
-        _base64Image2 = base64Encode(bytes); // Encode the image to base64
+        _base64Image2 = base64Encode(bytes);
         error = ''; // Clear previous error if image is selected
       });
     } else {
@@ -61,7 +54,6 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
     }
   }
 
-  // Method to handle the profile image upload
   Future uploadimage() async {
     final XFile? pickedImage1 =
         await picker.pickImage(source: ImageSource.gallery);
@@ -69,7 +61,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
       final bytes = await pickedImage1.readAsBytes();
       setState(() {
         _image1 = File(pickedImage1.path);
-        _base64Image1 = base64Encode(bytes); // Encode the image to base64
+        _base64Image1 = base64Encode(bytes);
         error = ''; // Clear previous error if image is selected
       });
     } else {
@@ -79,9 +71,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
     }
   }
 
-  // Method to register the user
   Future<void> registerUser() async {
-    // Validate inputs
     if (_fullNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter your full name")),
@@ -119,7 +109,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
     }
     if (_image2 == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please upload your profile image")),
+        const SnackBar(content: Text("Please upload your  image")),
       );
       return;
     }
@@ -134,11 +124,12 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
         phoneNumber: _phoneController.text,
         gender: _selectedGender ?? 'Male',
         imageUrl: _base64Image2,
-        image: _base64Image1, // Upload images to Firebase Storage if needed
-        role: 'coworker', // Assign role as 'coworker'
+        image: _base64Image1, // Upload image to Firebase Storage if needed
+        // Upload image to Firebase Storage if needed
+        role: 'coworker', // Assuming role is coworker
       );
-      // Show success dialog after registration
       showDialog(
+        // ignore: use_build_context_synchronously
         context: context,
         builder: (BuildContext context) {
           return DialogBox(
@@ -152,13 +143,13 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
         },
       );
     } catch (e) {
-      // Show error dialog if registration fails
       showDialog(
+        // ignore: use_build_context_synchronously
         context: context,
         builder: (BuildContext context) {
           return DialogBox(
-            icon: Icons.error_outline,
-            color: Colors.red,
+            icon: Icons.login,
+            color: Colors.green,
             title: "Registration failed: ${e.toString()}",
             onOkPressed: () {
               Navigator.of(context).pop();
@@ -169,10 +160,10 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
     }
   }
 
-  // Get the email passed from the previous page
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Get the email passed from the previous page
     email = ModalRoute.of(context)?.settings.arguments as String?;
   }
 
@@ -311,8 +302,15 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
                             _selectedGender = value;
                           });
                         },
+                        activeColor:
+                            Colors.blue, // Set the color of the radio button
                       ),
-                      const Text('Male'),
+                      const Text(
+                        "Male",
+                        style: TextStyle(
+                            color: Colors.blue), // Set the text color to blue
+                      ),
+                      const SizedBox(width: 10), // Space between radio buttons
                       Radio<String>(
                         value: 'Female',
                         groupValue: _selectedGender,
@@ -321,23 +319,138 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
                             _selectedGender = value;
                           });
                         },
+                        activeColor:
+                            Colors.blue, // Set the color of the radio button
                       ),
-                      const Text('Female'),
+                      const Text(
+                        "Female",
+                        style: TextStyle(
+                            color: Colors.blue), // Set the text color to blue
+                      ),
                     ],
+                  )
+                ],
+              ),
+              SizedBox(height: size.height * 0.03),
+
+              OutlinedButton.icon(
+                onPressed: uploadCitizenship,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(
+                    color: Colors.blueAccent,
+                    width: 1.5,
+                    style: BorderStyle.solid,
                   ),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                ),
+                icon: const Icon(
+                  Icons.add_a_photo_outlined,
+                  color: Colors.black,
+                ),
+                label: const Text(
+                  'Citizenship',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  if (_base64Image2.isEmpty)
+                    Text(
+                      error,
+                      style: const TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    )
+                  else
+                    const Text(
+                      "Citizenship Uploaded successfully!",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: size.height * 0.03),
+              OutlinedButton.icon(
+                onPressed: uploadimage,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(
+                    color: Colors.blueAccent,
+                    width: 1.5,
+                    style: BorderStyle.solid,
+                  ),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                ),
+                icon: const Icon(
+                  Icons.add_a_photo_outlined,
+                  color: Colors.black,
+                ),
+                label: const Text(
+                  'Profile',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  if (_base64Image1.isEmpty)
+                    Text(
+                      error,
+                      style: const TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    )
+                  else
+                    const Text(
+                      "Profile Uploaded successfully!",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
                 ],
               ),
               SizedBox(height: size.height * 0.03),
 
               // Password Field
               TextField(
-                focusNode: _passwordFocusNode,
                 controller: _passwordController,
+                focusNode: _passwordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Password",
                   prefixIcon: const Icon(
-                    Icons.lock,
+                    Icons.password,
                     color: Colors.blueAccent,
                   ),
                   border: OutlineInputBorder(
@@ -354,37 +467,23 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
               ),
               SizedBox(height: size.height * 0.03),
 
-              // Image Upload (Profile and Citizenship)
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: uploadimage,
-                    child: const Text('Upload Profile Image'),
-                  ),
-                  SizedBox(width: size.width * 0.05),
-                  ElevatedButton(
-                    onPressed: uploadCitizenship,
-                    child: const Text('Upload Citizenship Image'),
-                  ),
-                ],
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Error Message
-              if (error.isNotEmpty)
-                Text(
-                  error,
-                  style:
-                      TextStyle(color: Colors.red, fontSize: size.width * 0.04),
-                ),
-              SizedBox(height: size.height * 0.03),
-
-              // Register Button
+              // Continue Button
               ElevatedButton(
                 onPressed: registerUser,
-                child: const Text('Register'),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(size.width, size.height * 0.07),
+                  backgroundColor: Colors.blueAccent,
+                  minimumSize: Size(double.infinity, size.height * 0.07),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                child: Text(
+                  "Continue",
+                  style: TextStyle(
+                    fontSize: size.width * 0.05,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

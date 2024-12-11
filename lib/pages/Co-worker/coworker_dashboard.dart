@@ -409,7 +409,7 @@ class _CoworkerDashboardState extends State<CoworkerDashboard> {
               const SizedBox(height: 8),
 
               // Subtitle (Amenities)
-              Row(
+              Wrap(
                 children: amenities.map((amenity) {
                   return Text(
                     ' $amenity ',

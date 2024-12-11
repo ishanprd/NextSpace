@@ -10,7 +10,7 @@ class SpaceNotification extends StatefulWidget {
 }
 
 class _SpaceNotificationState extends State<SpaceNotification> {
-  late Stream<QuerySnapshot>? _notificationsStream;
+  late Stream<QuerySnapshot>? _notificationsStream = null;
   String? userId;
   String? spaceId;
 
@@ -72,8 +72,7 @@ class _SpaceNotificationState extends State<SpaceNotification> {
         title: const Text("Notifications"),
       ),
       body: _notificationsStream == null
-          ? const Center(
-              child: Text("No user logged in or no notifications available."))
+          ? const Center(child: CircularProgressIndicator())
           : StreamBuilder<QuerySnapshot>(
               stream: _notificationsStream,
               builder: (context, snapshot) {

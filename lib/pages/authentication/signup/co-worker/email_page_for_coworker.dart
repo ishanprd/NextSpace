@@ -189,6 +189,8 @@ class _EmailPageForCoworkerState extends State<EmailPageForCoworker> {
                 ),
               ),
               // 'Back' button
+              SizedBox(height: size.height * 0.02),
+
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context); // Go back to the previous page

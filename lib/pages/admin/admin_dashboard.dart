@@ -39,14 +39,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
       // Fetch booked count (replace with actual collection)
       QuerySnapshot bookedSnapshot =
-          await FirebaseFirestore.instance.collection('reports').get();
+          await FirebaseFirestore.instance.collection('spaces').get();
       setState(() {
         bookedCount = bookedSnapshot.docs.length;
       });
 
       // Fetch feedback count (replace with actual collection)
       QuerySnapshot feedbackSnapshot =
-          await FirebaseFirestore.instance.collection('spaces').get();
+          await FirebaseFirestore.instance.collection('reports').get();
       setState(() {
         feedbackCount = feedbackSnapshot.docs.length;
       });

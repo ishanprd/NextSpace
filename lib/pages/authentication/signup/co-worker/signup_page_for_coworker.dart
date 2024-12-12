@@ -136,7 +136,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
           return DialogBox(
             icon: Icons.login,
             color: Colors.green,
-            title: "Login Successfully",
+            title: "Register Successfully",
             onOkPressed: () {
               Navigator.pushReplacementNamed(context, '/login');
             },

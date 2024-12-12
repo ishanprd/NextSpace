@@ -140,7 +140,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
           return DialogBox(
             icon: Icons.login,
             color: Colors.green,
-            title: "Login Successfully",
+            title: "Register Successfully",
             onOkPressed: () {
               Navigator.pushReplacementNamed(context, '/login');
             },

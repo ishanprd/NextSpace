@@ -111,7 +111,7 @@ class _StartPageState extends State<StartPage> {
           // Get Started Button - Positioned at the bottom of the screen
           Positioned(
             bottom: size.height *
-                0.2, // Position button 20% from the bottom of the screen
+                0.15, // Position button 20% from the bottom of the screen
             left: 0,
             right: 0,
             child: Center(

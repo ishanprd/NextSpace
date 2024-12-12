@@ -36,7 +36,7 @@ class _SignupPageState extends State<SignupPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(
-                    height: 50,
+                    height: 30,
                   ),
                   const Icon(
                     Icons.location_on,
@@ -54,10 +54,10 @@ class _SignupPageState extends State<SignupPage> {
                     'A Hive to Strive',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                   Image.asset('assets/onboardingimagetwo.jpg'),
                   const SizedBox(
-                    height: 30,
+                    height: 20,
                   ),
                   ElevatedButton(
                     onPressed: () {

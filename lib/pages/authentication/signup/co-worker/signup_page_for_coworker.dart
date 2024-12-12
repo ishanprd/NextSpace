@@ -26,6 +26,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
 
   String _base64Image1 = "";
   String _base64Image2 = "";
+  bool _isLoading = false;
 
   AuthService authService = AuthService();
 
@@ -157,6 +158,10 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
           );
         },
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
   }
 
@@ -184,312 +189,324 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: size.height * 0.03,
-            horizontal: size.width * 0.04,
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.1),
-              Text(
-                'Create Your Account',
-                style: TextStyle(
-                  fontSize: size.width * 0.08,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: size.height * 0.01),
-              Text(
-                'Create account for exploring more',
-                style: TextStyle(fontSize: size.width * 0.04),
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Full Name Field
-              TextField(
-                focusNode: _nameFocusNode,
-                controller: _fullNameController,
-                decoration: InputDecoration(
-                  labelText: "Full Name",
-                  prefixIcon: const Icon(
-                    Icons.face,
-                    color: Colors.blueAccent,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Phone number Field
-              TextField(
-                focusNode: _phoneFocusNode,
-                controller: _phoneController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Phone number",
-                  prefixIcon: const Icon(
-                    Icons.phone,
-                    color: Colors.blueAccent,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Address Field
-              TextField(
-                controller: _addressController,
-                focusNode: _addressFocusNode,
-                keyboardType: TextInputType.streetAddress,
-                decoration: InputDecoration(
-                  labelText: "Address",
-                  prefixIcon: const Icon(
-                    Icons.location_on,
-                    color: Colors.blueAccent,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Gender Selection (Radio Buttons)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gender: ',
-                    style: TextStyle(
-                      fontSize: size.width * 0.05,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Radio<String>(
-                        value: 'Male',
-                        groupValue: _selectedGender,
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedGender = value;
-                          });
-                        },
-                        activeColor:
-                            Colors.blue, // Set the color of the radio button
-                      ),
-                      const Text(
-                        "Male",
-                        style: TextStyle(
-                            color: Colors.blue), // Set the text color to blue
-                      ),
-                      const SizedBox(width: 10), // Space between radio buttons
-                      Radio<String>(
-                        value: 'Female',
-                        groupValue: _selectedGender,
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedGender = value;
-                          });
-                        },
-                        activeColor:
-                            Colors.blue, // Set the color of the radio button
-                      ),
-                      const Text(
-                        "Female",
-                        style: TextStyle(
-                            color: Colors.blue), // Set the text color to blue
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              OutlinedButton.icon(
-                onPressed: uploadCitizenship,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: Colors.white,
-                  side: const BorderSide(
-                    color: Colors.blueAccent,
-                    width: 1.5,
-                    style: BorderStyle.solid,
-                  ),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                  ),
-                ),
-                icon: const Icon(
-                  Icons.add_a_photo_outlined,
-                  color: Colors.black,
-                ),
-                label: const Text(
-                  'Citizenship',
+      body: Stack(children: [
+        SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: size.height * 0.03,
+              horizontal: size.width * 0.04,
+            ),
+            child: Column(
+              children: [
+                SizedBox(height: size.height * 0.1),
+                Text(
+                  'Create Your Account',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  if (_base64Image2.isEmpty)
-                    Text(
-                      error,
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red,
-                      ),
-                    )
-                  else
-                    const Text(
-                      "Citizenship Uploaded successfully!",
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                ],
-              ),
-              SizedBox(height: size.height * 0.03),
-              OutlinedButton.icon(
-                onPressed: uploadimage,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: Colors.white,
-                  side: const BorderSide(
-                    color: Colors.blueAccent,
-                    width: 1.5,
-                    style: BorderStyle.solid,
-                  ),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                  ),
-                ),
-                icon: const Icon(
-                  Icons.add_a_photo_outlined,
-                  color: Colors.black,
-                ),
-                label: const Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  if (_base64Image1.isEmpty)
-                    Text(
-                      error,
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red,
-                      ),
-                    )
-                  else
-                    const Text(
-                      "Profile Uploaded successfully!",
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                ],
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Password Field
-              TextField(
-                controller: _passwordController,
-                focusNode: _passwordFocusNode,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: const Icon(
-                    Icons.password,
-                    color: Colors.blueAccent,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: size.height * 0.03),
-
-              // Continue Button
-              ElevatedButton(
-                onPressed: registerUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  minimumSize: Size(double.infinity, size.height * 0.07),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                child: Text(
-                  "Continue",
-                  style: TextStyle(
-                    fontSize: size.width * 0.05,
-                    color: Colors.white,
+                    fontSize: size.width * 0.08,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: size.height * 0.01),
+                Text(
+                  'Create account for exploring more',
+                  style: TextStyle(fontSize: size.width * 0.04),
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                // Full Name Field
+                TextField(
+                  focusNode: _nameFocusNode,
+                  controller: _fullNameController,
+                  decoration: InputDecoration(
+                    labelText: "Full Name",
+                    prefixIcon: const Icon(
+                      Icons.face,
+                      color: Colors.blueAccent,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                // Phone number Field
+                TextField(
+                  focusNode: _phoneFocusNode,
+                  controller: _phoneController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: "Phone number",
+                    prefixIcon: const Icon(
+                      Icons.phone,
+                      color: Colors.blueAccent,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                // Address Field
+                TextField(
+                  controller: _addressController,
+                  focusNode: _addressFocusNode,
+                  keyboardType: TextInputType.streetAddress,
+                  decoration: InputDecoration(
+                    labelText: "Address",
+                    prefixIcon: const Icon(
+                      Icons.location_on,
+                      color: Colors.blueAccent,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                // Gender Selection (Radio Buttons)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Gender: ',
+                      style: TextStyle(
+                        fontSize: size.width * 0.05,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Radio<String>(
+                          value: 'Male',
+                          groupValue: _selectedGender,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedGender = value;
+                            });
+                          },
+                          activeColor:
+                              Colors.blue, // Set the color of the radio button
+                        ),
+                        const Text(
+                          "Male",
+                          style: TextStyle(
+                              color: Colors.blue), // Set the text color to blue
+                        ),
+                        const SizedBox(
+                            width: 10), // Space between radio buttons
+                        Radio<String>(
+                          value: 'Female',
+                          groupValue: _selectedGender,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedGender = value;
+                            });
+                          },
+                          activeColor:
+                              Colors.blue, // Set the color of the radio button
+                        ),
+                        const Text(
+                          "Female",
+                          style: TextStyle(
+                              color: Colors.blue), // Set the text color to blue
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                OutlinedButton.icon(
+                  onPressed: uploadCitizenship,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(
+                      color: Colors.blueAccent,
+                      width: 1.5,
+                      style: BorderStyle.solid,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.add_a_photo_outlined,
+                    color: Colors.black,
+                  ),
+                  label: const Text(
+                    'Citizenship',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (_base64Image2.isEmpty)
+                      Text(
+                        error,
+                        style: const TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red,
+                        ),
+                      )
+                    else
+                      const Text(
+                        "Citizenship Uploaded successfully!",
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: size.height * 0.03),
+                OutlinedButton.icon(
+                  onPressed: uploadimage,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(
+                      color: Colors.blueAccent,
+                      width: 1.5,
+                      style: BorderStyle.solid,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.add_a_photo_outlined,
+                    color: Colors.black,
+                  ),
+                  label: const Text(
+                    'Profile',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (_base64Image1.isEmpty)
+                      Text(
+                        error,
+                        style: const TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red,
+                        ),
+                      )
+                    else
+                      const Text(
+                        "Profile Uploaded successfully!",
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                // Password Field
+                TextField(
+                  controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    prefixIcon: const Icon(
+                      Icons.password,
+                      color: Colors.blueAccent,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size.height * 0.03),
+
+                // Continue Button
+                ElevatedButton(
+                  onPressed: registerUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    minimumSize: Size(double.infinity, size.height * 0.07),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: Text(
+                    "Continue",
+                    style: TextStyle(
+                      fontSize: size.width * 0.05,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+        if (_isLoading)
+          Container(
+            color: Colors.black54,
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
+          ),
+      ]),
     );
   }
 }

@@ -109,47 +109,70 @@ class _CreateSpaceState extends State<CreateSpace> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      if (_base64Image.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please upload an image of the space.")),
+        );
+        return;
+      }
+
+      if (_location == null || _location!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select a location.")),
+        );
+        return;
+      }
+
+      if (_selectedAmenities.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select at least one amenity.")),
+        );
+        return;
+      }
+
+      if (_roomType.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select a room type.")),
+        );
+        return;
+      }
+
+      // If all validations pass
       _formKey.currentState!.save();
 
       try {
-        // Create the Space object
+        // Save data to Firestore (existing logic)
         Space space = Space(
-          spaceName:
-              _spaceController.text.trim(), // Provide default value if null
-          description: _descriptionController.text.trim(), // Default if null
-          hoursPrice: _monthlyPrice ?? "0", // Default price if null
-          city: _city ?? "Unknown City", // Default city if null
-          location: _location ?? "0.0, 0.0", // Default location if null
-          imagePath: _base64Image, // This can remain null if not selected
+          spaceName: _spaceController.text.trim(),
+          description: _descriptionController.text.trim(),
+          hoursPrice: _monthlyPrice ?? "0",
+          city: _city ?? "Unknown City",
+          location: _location ?? "0.0, 0.0",
+          imagePath: _base64Image,
           selectedAmenities: _selectedAmenities,
           roomType: _roomType,
           ownerId: ownerId,
-          status: 'Pending', // Replace with actual owner ID
+          status: 'Pending',
           createdAt: Timestamp.fromDate(DateTime.now()),
         );
 
-        // Create a reference to Firestore
         FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-        // Save the space data to Firestore
         await firestore.collection('spaces').add(space.toMap());
 
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Space registered successfully!")),
         );
         Navigator.pushNamed(context, '/space_owner');
 
-        // Optionally, reset the form after submission
+        // Reset form
         _formKey.currentState!.reset();
         setState(() {
           _imagePath = null;
           _location = null;
           _selectedAmenities.clear();
-          _roomTypes.clear();
+          _roomType = '';
         });
       } catch (e) {
-        // Handle errors
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Failed to register space: $e")),
         );
@@ -263,12 +286,13 @@ class _CreateSpaceState extends State<CreateSpace> {
                 ),
                 controller: TextEditingController(text: _location),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please select a location";
+                  if (_location == null || _location!.isEmpty) {
+                    return "Please select a location.";
                   }
                   return null;
                 },
               ),
+
               const SizedBox(height: 20),
 
               // Amenities Checkbox List

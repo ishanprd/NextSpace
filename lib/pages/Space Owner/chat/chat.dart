@@ -64,7 +64,24 @@ class _ChatState extends State<Chat> {
                   if (snapshot.connectionState == ConnectionState.active) {
                     if (snapshot.hasData) {
                       QuerySnapshot chatRoomSnapshot = snapshot.data!;
-
+                      if (chatRoomSnapshot.docs.isEmpty) {
+                        // Enhanced "No Chats Available" UI
+                        return const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.chat_bubble_outline,
+                                  size: 64, color: Colors.grey),
+                              SizedBox(height: 16),
+                              Text(
+                                "No Chats Available",
+                                style:
+                                    TextStyle(fontSize: 18, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                       return ListView.builder(
                         // Display a list of chatrooms
                         itemCount: chatRoomSnapshot.docs.length,

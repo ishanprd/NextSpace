@@ -68,11 +68,20 @@ class _ChatState extends State<Chat> {
 
                       if (chatRoomSnapshot.docs.isEmpty) {
                         return const Center(
-                          child: Text(
-                            "No Chats Available",
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.chat_bubble_outline,
+                                  size: 64, color: Colors.grey),
+                              SizedBox(height: 16),
+                              Text(
+                                "No Chats Available",
+                                style:
+                                    TextStyle(fontSize: 18, color: Colors.grey),
+                              ),
+                            ],
                           ),
-                        ); // Show a message if no chatrooms are available.
+                        );
                       } else {
                         return ListView.builder(
                           // List all chatrooms the user is part of.

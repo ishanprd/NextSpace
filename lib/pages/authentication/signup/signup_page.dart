@@ -36,7 +36,7 @@ class _SignupPageState extends State<SignupPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(
-                    height: 30,
+                    height: 20,
                   ),
                   const Icon(
                     Icons.location_on,

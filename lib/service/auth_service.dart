@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nextspace/Model/user_model.dart';
+import 'package:nextspace/Widget/dialog_box.dart';
+
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -16,8 +18,9 @@ class AuthService {
     required String phoneNumber,
     required String gender,
     required String imageUrl,
-    required String role,
     required String image,
+    required String role,
+
   }) async {
     try {
       // Firebase Authentication - Create User
@@ -46,8 +49,18 @@ class AuthService {
       // Send email verification
       await user.sendEmailVerification();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User registered successfully!")),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return DialogBox(
+            icon: Icons.login,
+            color: Colors.green,
+            title: "Register Successfully",
+            onOkPressed: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          );
+        },
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

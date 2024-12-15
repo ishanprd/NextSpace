@@ -129,20 +129,7 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
         // Upload image to Firebase Storage if needed
         role: 'coworker', // Assuming role is coworker
       );
-      showDialog(
-        // ignore: use_build_context_synchronously
-        context: context,
-        builder: (BuildContext context) {
-          return DialogBox(
-            icon: Icons.login,
-            color: Colors.green,
-            title: "Register Successfully",
-            onOkPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-          );
-        },
-      );
+
     } catch (e) {
       showDialog(
         // ignore: use_build_context_synchronously

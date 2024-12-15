@@ -134,19 +134,7 @@ class _SignupPageForSpaceOwnerState extends State<SignupPageForSpaceOwner> {
         role: 'space_owner',
       );
 
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return DialogBox(
-            icon: Icons.login,
-            color: Colors.green,
-            title: "Register Successfully",
-            onOkPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-          );
-        },
-      );
+
     } catch (e) {
       showDialog(
         context: context,

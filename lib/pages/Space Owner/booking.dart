@@ -61,7 +61,16 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
 
       spaceId = userSnapshot.id;
       _fetchBookings();
+      setState(() {
+        isLoading = false; // Set loading state to true, indicating the data is being fetched.
+      });
     }
+    else{
+      setState(() {
+        isLoading = false; // Set loading state to true, indicating the data is being fetched.
+      });
+    }
+
   }
 
   ///function to send notifications
@@ -230,83 +239,89 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
       orders = cancelledBookings;
     }
 
+    // Show loading indicator if data is still being fetched
+    // if (isLoading) {
+    //   return const Center(
+    //     child: CircularProgressIndicator(),
+    //   );
+    // }
+
+    // Show a message if the orders list is empty
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: orders.isEmpty
           ? const Center(
-              child: Text(
-                "No data available",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            )
+        child: Text(
+          "No bookings available",
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      )
           : ListView.builder(
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final user = orders[index];
-                final base64Image = user['userPhoto'];
+        itemCount: orders.length,
+        itemBuilder: (context, index) {
+          final user = orders[index];
+          final base64Image = user['userPhoto'];
 
-                Uint8List? imageBytes;
-                try {
-                  imageBytes =
-                      base64Decode(base64Image); // Decode base64 image data
-                } catch (e) {
-                  print('Error decoding base64: $e');
-                  imageBytes = null; // Handle decoding error
-                }
+          Uint8List? imageBytes;
+          try {
+            imageBytes = base64Decode(base64Image); // Decode base64 image data
+          } catch (e) {
+            print('Error decoding base64: $e');
+            imageBytes = null; // Handle decoding error
+          }
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: imageBytes != null
-                          ? MemoryImage(imageBytes) // Display decoded image
-                          : const AssetImage('assets/userprofile.jpg')
-                              as ImageProvider,
-                      radius: 25,
-                    ),
-                    title: Text(
-                      orders[index]["userName"] ?? 'Unknown',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Date: ${orders[index]['date']}"),
-                        Text("Price: Rs. ${orders[index]['price']}"),
-                        Text("Status: ${orders[index]['status']}"),
-                      ],
-                    ),
-                    trailing: listType == "Requests"
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.check,
-                                    color: Colors.green),
-                                onPressed: () {
-                                  // Pass the correct bookingId for the selected booking
-                                  updateBookingStatus(
-                                      orders[index]['bookingId'], 'Accepted');
-                                },
-                              ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  // Pass the correct bookingId for the selected booking
-                                  updateBookingStatus(
-                                      orders[index]['bookingId'], 'Cancelled');
-                                },
-                              ),
-                            ],
-                          )
-                        : null,
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage: imageBytes != null
+                    ? MemoryImage(imageBytes) // Display decoded image
+                    : const AssetImage('assets/userprofile.jpg')
+                as ImageProvider,
+                radius: 25,
+              ),
+              title: Text(
+                orders[index]["userName"] ?? 'Unknown',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Date: ${orders[index]['date']}"),
+                  Text("Price: Rs. ${orders[index]['price']}"),
+                  Text("Status: ${orders[index]['status']}"),
+                ],
+              ),
+              trailing: listType == "Requests"
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green),
+                    onPressed: () {
+                      // Pass the correct bookingId for the selected booking
+                      updateBookingStatus(
+                          orders[index]['bookingId'], 'Accepted');
+                    },
                   ),
-                );
-              },
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      // Pass the correct bookingId for the selected booking
+                      updateBookingStatus(
+                          orders[index]['bookingId'], 'Cancelled');
+                    },
+                  ),
+                ],
+              )
+                  : null,
             ),
+          );
+        },
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -328,9 +343,8 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
           ],
         ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator()) // Show loading
-          : TabBarView(
+      body:  // Show loading
+          TabBarView(
               controller: _tabController,
               children: [
                 _buildOrderList("Requests"),

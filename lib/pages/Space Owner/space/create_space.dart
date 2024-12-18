@@ -20,6 +20,7 @@ class _CreateSpaceState extends State<CreateSpace> {
 
   final TextEditingController _priceController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   String? _spaceName;
   String? _description;
   String? _monthlyPrice;
@@ -151,6 +152,9 @@ class _CreateSpaceState extends State<CreateSpace> {
         );
         return;
       }
+      setState(() {
+        _isLoading = true;
+      });
 
       // If all validations pass
       _formKey.currentState!.save();
@@ -160,7 +164,7 @@ class _CreateSpaceState extends State<CreateSpace> {
         Space space = Space(
           spaceName: _spaceController.text.trim(),
           description: _descriptionController.text.trim(),
-          hoursPrice: _monthlyPrice ?? "0",
+          hoursPrice:  _priceController.text ?? "0",
           city: _city ?? "Unknown City",
           location: _location ?? "0.0, 0.0",
           imagePath: _base64Image,
@@ -191,6 +195,11 @@ class _CreateSpaceState extends State<CreateSpace> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Failed to register space: $e")),
         );
+      }
+      finally {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
       }
     }
   }
@@ -410,12 +419,21 @@ class _CreateSpaceState extends State<CreateSpace> {
 
               // Submit Button
               ElevatedButton(
-                onPressed: _submitForm,
+                onPressed:  _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.blueAccent,
                 ),
-                child: const Text(
+                child:_isLoading
+                    ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.0,
+                  ),
+                )
+                    :  const Text(
                   "Create Space",
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),

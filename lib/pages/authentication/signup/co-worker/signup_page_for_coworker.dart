@@ -114,6 +114,9 @@ class _SignupPageForCoworkerState extends State<SignupPageForCoworker> {
       );
       return;
     }
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       // Call AuthService to register the user

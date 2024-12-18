@@ -17,6 +17,8 @@ class CreateSpace extends StatefulWidget {
 }
 
 class _CreateSpaceState extends State<CreateSpace> {
+
+  final TextEditingController _priceController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _spaceName;
   String? _description;
@@ -29,6 +31,13 @@ class _CreateSpaceState extends State<CreateSpace> {
   String _base64Image = "";
   final picker = ImagePicker();
   Uint8List? imageBytes;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _priceController.text = _monthlyPrice ?? "";
+  }
 
   String ownerId = FirebaseAuth.instance.currentUser?.uid ?? "default_owner_id";
 
@@ -136,6 +145,12 @@ class _CreateSpaceState extends State<CreateSpace> {
         );
         return;
       }
+      if (_monthlyPrice == "0" && _monthlyPrice!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please Enter the per Hours price")),
+        );
+        return;
+      }
 
       // If all validations pass
       _formKey.currentState!.save();
@@ -238,6 +253,7 @@ class _CreateSpaceState extends State<CreateSpace> {
 
               // Monthly Price Field
               TextFormField(
+                controller: _priceController,
                 decoration: const InputDecoration(
                   labelText: "Price Per Hours",
                   border: OutlineInputBorder(),
@@ -251,7 +267,7 @@ class _CreateSpaceState extends State<CreateSpace> {
                   return null;
                 },
                 onSaved: (value) {
-                  _monthlyPrice = value;
+                  _monthlyPrice = _priceController.text;
                 },
               ),
               const SizedBox(height: 20),
